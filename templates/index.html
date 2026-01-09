@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Pulse</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Social Pulse</h1>
+            <p>Social Media Intelligence & Analytics</p>
+        </header>
+
+        <!-- Section 1: Scraper Input -->
+        <div class="card" id="scraper-input-section">
+            <h2>Instagram Sentiment Analysis</h2>
+            <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">Enter a post link to fetch comments.</p>
+            <form id="scrape-form">
+                <label for="post-url">Instagram Post Link or Shortcode</label>
+                <input type="text" id="post-url" placeholder="https://www.instagram.com/p/..." required>
+                <button type="submit" id="scrape-btn">Scrape Comments</button>
+            </form>
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Scraping comments... This might take a while.</p>
+            </div>
+            <div id="error-message" class="error-message"></div>
+        </div>
+
+        <!-- Section 2: Scraper Results (Hidden by default) -->
+        <div class="card results-area" id="scraper-results-section" style="display: none;">
+            <h2>Scraper Results</h2>
+
+            <!-- Analyzed Data Preview -->
+            <div class="result-block">
+                <h3>Sentiment Analysis</h3>
+                <div class="sentiment-summary" id="scrape-sentiment-summary"
+                    style="display: flex; gap: 15px; margin-bottom: 15px;">
+                    <!-- JS will populate -->
+                </div>
+                <div class="actions" style="margin-bottom: 20px;">
+                    <button id="download-scrape-analyzed" class="btn-secondary">Download Analyzed CSV</button>
+                    <button id="download-scrape-raw" class="btn-outline">Download Raw List</button>
+                </div>
+            </div>
+
+            <!-- Table Preview (Optional or Collapsible) -->
+            <details>
+                <summary style="cursor: pointer; color: var(--secondary-color); font-weight: 600;">View Comments Preview
+                </summary>
+                <div class="table-container" style="max-height: 400px; overflow-y: auto; margin-top: 10px;">
+                    <table id="scrape-results-table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Comment</th>
+                                <th>Sentiment</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </details>
+        </div>
+
+        <!-- Section 3: CSV Upload Analysis -->
+        <div class="card" id="upload-section">
+            <h2>CSV Sentiment Analysis</h2>
+            <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">Upload a CSV with a 'comment' column to
+                analyze your own data.</p>
+            <form id="upload-form">
+                <label for="csv-file">Upload CSV</label>
+                <input type="file" id="csv-file" accept=".csv" required>
+                <button type="submit" id="analyze-btn">Analyze Sentiment</button>
+            </form>
+            <div id="upload-loading" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Analyzing...</p>
+            </div>
+            <div id="upload-error" class="error-message"></div>
+        </div>
+
+        <!-- Section 3 Results (Hidden by default) -->
+        <div class="card results-area" id="upload-results-section" style="display: none;">
+            <h3>Analysis Results</h3>
+            <div class="sentiment-summary" id="upload-sentiment-summary"
+                style="display: flex; gap: 15px; margin-bottom: 15px;"></div>
+            <div class="actions">
+                <button id="download-upload-analyzed" class="btn-secondary">Download Analyzed CSV</button>
+            </div>
+            <details style="margin-top: 15px;">
+                <summary style="cursor: pointer; color: var(--secondary-color); font-weight: 600;">View Data Preview
+                </summary>
+                <div class="table-container" style="max-height: 400px; overflow-y: auto; margin-top: 10px;">
+                    <table id="upload-results-table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Comment</th>
+                                <th>Sentiment</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </details>
+        </div>
+
+        <script>
+            // Store data globally to handle downloads
+            let currentScrapeData = [];
+            let currentUploadData = [];
+
+            // --- Helper: Update Sentiment Summary
+            function updateSummary(elementId, counts) {
+                const container = document.getElementById(elementId);
+                container.innerHTML = '';
+                for (const [sentiment, count] of Object.entries(counts)) {
+                    container.innerHTML += `<div class="badge ${sentiment.toLowerCase()}"><strong>${sentiment}:</strong> ${count}</div>`;
+                }
+            }
+
+            // --- Helper: Populate Table
+            function populateTable(tableId, data, isUpload = false) {
+                const tbody = document.querySelector(`#${tableId} tbody`);
+                tbody.innerHTML = '';
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    if (isUpload) {
+                        row.innerHTML = `<td>${item.username || ''}</td><td>${item.comment}</td><td><span class="tag ${item.sentiment.toLowerCase()}">${item.sentiment}</span></td>`;
+                    } else {
+                        row.innerHTML = `<td>${item.username}</td><td>${item.comment}</td><td><span class="tag ${item.sentiment?.toLowerCase() || 'neutral'}">${item.sentiment || 'N/A'}</span></td>`;
+                    }
+                    tbody.appendChild(row);
+                });
+            }
+
+            // --- Helper: Download Trigger
+            async function triggerDownload(url, payload) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const downloadUrl = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = downloadUrl;
+                        const contentDisp = response.headers.get('Content-Disposition');
+                        let filename = contentDisp ? contentDisp.split('filename=')[1] : 'download.csv';
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                    } else {
+                        const err = await response.json();
+                        alert("Download failed: " + (err.error || "Unknown error"));
+                    }
+                } catch (e) {
+                    alert("Download error: " + e);
+                }
+            }
+
+            // --- 1. Scraper Logic
+            document.getElementById('scrape-form').addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const input = document.getElementById('post-url').value;
+                // Basic shortcode extraction
+                let shortcode = input;
+                if (input.includes('instagram.com/p/')) {
+                    shortcode = input.split('/p/')[1].split('/')[0].split('?')[0];
+                } else if (input.includes('instagram.com/reel/')) {
+                    shortcode = input.split('/reel/')[1].split('/')[0].split('?')[0];
+                }
+
+                const loading = document.getElementById('loading');
+                const errorMsg = document.getElementById('error-message');
+                const resultsSection = document.getElementById('scraper-results-section');
+
+                loading.style.display = 'block';
+                errorMsg.style.display = 'none';
+                resultsSection.style.display = 'none';
+
+                try {
+                    const response = await fetch('/scrape', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ shortcode: shortcode })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        currentScrapeData = data.analyzed_comments; // Store for download buttons
+                        // Populate UI
+                        updateSummary('scrape-sentiment-summary', data.sentiment_counts);
+                        populateTable('scrape-results-table', currentScrapeData);
+                        resultsSection.style.display = 'block';
+                    } else {
+                        errorMsg.textContent = data.error || "An error occurred.";
+                        errorMsg.style.display = 'block';
+                    }
+                } catch (err) {
+                    errorMsg.textContent = "Network or Server Error.";
+                    errorMsg.style.display = 'block';
+                } finally {
+                    loading.style.display = 'none';
+                }
+            });
+
+            // --- Scraper Downloads
+            document.getElementById('download-scrape-raw').addEventListener('click', () => {
+                // Use original raw download logic
+                const input = document.getElementById('post-url').value;
+                // extract shortcode again or store it globally (lazy re-extraction here)
+                let shortcode = input;
+                if (input.includes('instagram.com/p/')) shortcode = input.split('/p/')[1].split('/')[0].split('?')[0];
+                triggerDownload('/download_csv', { comments: currentScrapeData, shortcode: shortcode });
+            });
+
+            document.getElementById('download-scrape-analyzed').addEventListener('click', () => {
+                triggerDownload('/download_analyzed_csv', { comments: currentScrapeData, filename_prefix: 'scraped_analyzed' });
+            });
+
+
+            // --- 2. Upload Logic
+            document.getElementById('upload-form').addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const fileInput = document.getElementById('csv-file');
+                if (fileInput.files.length === 0) return;
+
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+
+                const loading = document.getElementById('upload-loading');
+                const errorMsg = document.getElementById('upload-error');
+                const resultsSection = document.getElementById('upload-results-section');
+
+                loading.style.display = 'block';
+                errorMsg.style.display = 'none';
+                resultsSection.style.display = 'none';
+
+                try {
+                    const response = await fetch('/analyze_upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    if (response.ok) {
+                        currentUploadData = data.comments;
+                        updateSummary('upload-sentiment-summary', data.counts);
+                        populateTable('upload-results-table', currentUploadData, true);
+                        resultsSection.style.display = 'block';
+                    } else {
+                        errorMsg.textContent = data.error || "Analysis failed.";
+                        errorMsg.style.display = 'block';
+                    }
+                } catch (err) {
+                    errorMsg.textContent = "Upload failed: " + err;
+                    errorMsg.style.display = 'block';
+                } finally {
+                    loading.style.display = 'none';
+                }
+            });
+
+            document.getElementById('download-upload-analyzed').addEventListener('click', () => {
+                triggerDownload('/download_analyzed_csv', { comments: currentUploadData, filename_prefix: 'uploaded_analyzed' });
+            });
+
+        </script>
+</body>
+
+</html>
