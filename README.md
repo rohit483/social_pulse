@@ -61,7 +61,7 @@ Follow these steps to set up the project locally.
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/AbhiJeet4241/social_pulse.git
+git clone https://github.com/rohit483/social_pulse.git
 cd social_pulse
 ```
 
