@@ -3,8 +3,6 @@ pandas
 flask-cors
 python-dotenv
 instaloader
-selenium
 requests
-webdriver-manager
 vaderSentiment
-browser_cookie3
+instagrapi

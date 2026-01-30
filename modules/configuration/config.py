@@ -32,18 +32,37 @@ class Config:
     _user = os.environ.get('INSTAGRAM_USERNAME', '').strip()
     _pass = os.environ.get('INSTAGRAM_PASSWORD', '').strip()
 
-    # Remove accidentally included quotes (both single and double)
-    INSTAGRAM_USERNAME = _user.strip("'").strip('"') if _user else None
-    INSTAGRAM_PASSWORD = _pass.strip("'").strip('"') if _pass else None
+    # Function to clean credentials
+    def _clean_credential(value):
+        if not value:
+            return None
+        # Loop to remove multiple layers of quotes if present (e.g. "'pass'")
+        cleaned = value.strip()
+        while (cleaned.startswith('"') and cleaned.endswith('"')) or \
+              (cleaned.startswith("'") and cleaned.endswith("'")):
+            cleaned = cleaned[1:-1]
+        return cleaned
+
+    INSTAGRAM_USERNAME = _clean_credential(_user)
+    INSTAGRAM_PASSWORD = _clean_credential(_pass)
+
+    # Validation & Debugging
+    import logging
+    _logger = logging.getLogger(__name__)
+
+    if INSTAGRAM_PASSWORD:
+        _masked_pass = INSTAGRAM_PASSWORD[0] + "*" * (len(INSTAGRAM_PASSWORD)-2) + INSTAGRAM_PASSWORD[-1] if len(INSTAGRAM_PASSWORD) > 2 else "***"
+        _logger.info(f"Config Loaded Username: {INSTAGRAM_USERNAME}")
+        _logger.info(f"Config Loaded Password: {_masked_pass} (Length: {len(INSTAGRAM_PASSWORD)})")
+        if len(INSTAGRAM_PASSWORD) < 5:
+            _logger.warning("⚠️ Password length is suspiciously short! Check .env formatting.")
 
     # Validation: Log warning if credentials are missing
     if not INSTAGRAM_USERNAME or not INSTAGRAM_PASSWORD:
-        import logging
-        logging.warning("Instagram credentials not found in environment variables!")
+        _logger.warning("Instagram credentials not found in environment variables!")
     
-    # Paths to session file and chrome driver
+    # Paths to session file
     SESSION_FILE = os.environ.get('INSTAGRAM_SESSION_FILE') or os.path.join(BASE_DIR, 'SessionFiles', 'instaloader_session')
-    CHROME_DRIVER_PATH = os.environ.get('CHROME_DRIVER_PATH') or os.path.join(BASE_DIR, 'chromedriver.exe')
 
     # Comment limit
     MAX_COMMENTS = 200

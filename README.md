@@ -4,14 +4,13 @@
 
 ## 🚀 Key Features
 
-### 📸 Fail-Proof Instagram Scraper
+### 📸 Fail-Proof Hybrid Scraper
 
-- **Smart Scraping**: Fetches comments from public Instagram posts using `instaloader`.
-- **4-Tier Login System**: Automatically tries methods in order until successful:
-  1. **Session File**: Loads existing session for instant, captcha-free access.
-  2. **Direct Login**: Standard username/password authentication.
-  3. **Selenium Fallback**: Launches a headless browser to bypass complex login challenges.
-  4. **Browser Cookies**: Auto-detects and imports your logged-in session from Chrome, Firefox, or Edge (Clone-friendly feature!).
+- **Dual-Engine System**: Combines the strengths of two powerful libraries:
+  - **Primary**: `instaloader` (Fast, efficient for standard interaction).
+  - **Fallback**: `instagrapi` (Mimics mobile API, highly resistant to bot detection).
+- **Auto-Failover**: If the primary engine encounters a "Login Required" or connection error, the system automatically switches to the fallback engine without crashing.
+- **Robust Session Management**: Maintains separate session files for each engine to ensure stability.
 - **Session Warm-up**: Automatically "warms up" fresh sessions with dummy API calls to prevent "Something went wrong" errors on the first scrape.
 - **Lazy Loading**: Scraper resources are only initialized when the scrape button is clicked, ensuring instant app startup.
 
@@ -38,7 +37,7 @@ social_pulse/
 │   ├── analysis/           # Sentiment Engine (VADER + Custom Lexicon)
 │   ├── configuration/      # Config & Env Management
 │   └── instagram/          # Scraper, Login Logic & Browser Cookie Import
-├── env/                    # Virtual Environment & Secrets (gitignored)
+├── venv/                    # Virtual Environment & Secrets (gitignored)
 │   └── .env                # Secrets file
 ├── static/                 # Assets (CSS/JS)
 ├── templates/              # HTML Templates
@@ -55,8 +54,7 @@ Follow these steps to set up the project locally.
 
 ### Prerequisites
 
-- Python 3.8 or higher
-- Google Chrome (optional, for Selenium fallback)
+- Python 3.9 or higher
 
 ### 1. Clone the Repository
 
@@ -103,7 +101,7 @@ pip install -r requirements.txt
    SECRET_KEY=dev-secret-key-123
    INSTAGRAM_USERNAME=your_instagram_username
    INSTAGRAM_PASSWORD="your_instagram_password"
-   # Note: Wrap password in double quotes if it has special characters (#, $)
+   # Note: Wrap password in single or double quotes to handle special characters (#, $)
    ```
 
 ### 6. Run the Application
@@ -120,16 +118,16 @@ Access the dashboard at: `http://127.0.0.1:5000`
 
 **"Wrong Password" Error?**
 
-- Ensure your password in `.env` is wrapped in double quotes: `INSTAGRAM_PASSWORD="pass#word"`
-- **Alternative**: Simply login to Instagram in your Chrome/Edge browser. The app will automatically detect (Step 4) and import your session!
+- Ensure your password in `.env` is wrapped in quotes: `INSTAGRAM_PASSWORD='pass#word'`
+- The app logs a masked version of your password (e.g., `p******`) on startup. Check the console to verify it loaded correctly.
+
+**"Login Fails" on Instaloader?**
+
+- Don't worry! The app will automatically switch to **Instagrapi**. Look for "Attempting Fallback Login" in the logs.
 
 **First Run Delay?**
 
-- The first login might take 5-10 seconds as it "warms up" the session. Subsequent runs will use the saved session file and be instant.
-
-**Cloning this Repo?**
-
-- You do not need to copy any session files. Just run the app, and it will create a fresh session on your machine using your credentials or browser cookies.
+- The first login might take 5-10 seconds. Subsequent runs will use the saved session files and be instant.
 
 ---
 
