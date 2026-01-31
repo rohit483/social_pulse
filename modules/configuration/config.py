@@ -46,6 +46,9 @@ class Config:
     INSTAGRAM_USERNAME = _clean_credential(_user)
     INSTAGRAM_PASSWORD = _clean_credential(_pass)
 
+    # User Agent
+    USER_AGENT = 'Instagram 123.0.0.26.121 Android (28/9; 320dpi; 720x1280; Xiaomi; Redmi Note 7; lavender; qcom; en_US)'
+
     # Validation & Debugging
     import logging
     _logger = logging.getLogger(__name__)

@@ -4,6 +4,7 @@ import os
 import time
 from instagrapi import Client
 from modules.configuration.config import Config
+from modules.instagram.auth import load_instaloader_session, load_instagrapi_session, get_instagrapi_session_path
 
 # Configure Logging
 logging.basicConfig(level=logging.INFO)
@@ -18,7 +19,7 @@ class InstagramScraper:
     def __init__(self):
         # 1. Initialize Instaloader (Primary)
         self.L = instaloader.Instaloader()
-        self.L.context.user_agent = 'Instagram 123.0.0.26.121 Android (28/9; 320dpi; 720x1280; Xiaomi; Redmi Note 7; lavender; qcom; en_US)'
+        # User Agent is now set inside authenticate_instaloader
         
         # 2. Initialize Instagrapi (Fallback)
         self.cl = Client()
@@ -51,56 +52,22 @@ class InstagramScraper:
 # 2. Function to initialize Instaloader session
     def _init_instaloader_session(self):
         username = Config.INSTAGRAM_USERNAME
-        password = Config.INSTAGRAM_PASSWORD
+        # Strict mode: No password used here.
         session_file = Config.SESSION_FILE
         
-        logger.info("--- Attempting Primary Login (Instaloader) ---")
-        try:
-            if os.path.exists(session_file):
-                logger.info(f"Loading Instaloader session from {session_file}...")
-                self.L.load_session_from_file(username, session_file)
-                self.instaloader_active = True
-                logger.info("Instaloader session loaded.")
-            else:
-                 logger.info("No Instaloader session file found. Attempting direct login...")
-                 self.L.login(username, password)
-                 self.L.save_session_to_file(session_file)
-                 self.instaloader_active = True
-                 logger.info("Instaloader Login Successful.")
-                 
-                 # WARMUP session
-                 self.warm_up_session(username)
-
-        except Exception as e:
-            logger.warning(f"Instaloader Login Failed: {e}")
-            self.instaloader_active = False
+        self.instaloader_active = load_instaloader_session(self.L, username, session_file)
+        
+        if self.instaloader_active:
+             self.warm_up_session(username)
 
 #---------------------------------------------------------------------------------
 # 3. Function to initialize Instagrapi session
     def _init_instagrapi_session(self):
-        username = Config.INSTAGRAM_USERNAME
-        password = Config.INSTAGRAM_PASSWORD
+        # Strict mode: No password used here.
         session_file = Config.SESSION_FILE
-        instagrapi_session_file = session_file.replace(".pkl", "") + "_instagrapi.json"
+        instagrapi_session_file = get_instagrapi_session_path(session_file)
         
-        logger.info("--- Attempting Fallback Login (Instagrapi) ---")
-        try:
-             if os.path.exists(instagrapi_session_file):
-                 logger.info(f"Loading Instagrapi session from {instagrapi_session_file}...")
-                 self.cl.load_settings(instagrapi_session_file)
-                 self.cl.login(username, password)
-                 self.instagrapi_active = True
-                 logger.info("Instagrapi session loaded and verified.")
-             else:
-                 logger.info("Attempting fresh Instagrapi login...")
-                 self.cl.login(username, password)
-                 self.cl.dump_settings(instagrapi_session_file)
-                 self.instagrapi_active = True
-                 logger.info("Instagrapi Login Successful.")
-                 
-        except Exception as e:
-             logger.error(f"Instagrapi Fallback Failed: {e}")
-             self.instagrapi_active = False
+        self.instagrapi_active = load_instagrapi_session(self.cl, instagrapi_session_file)
 
 #---------------------------------------------------------------------------------
 # 4. Function to warm up session
@@ -141,7 +108,10 @@ class InstagramScraper:
                 logger.warning(f"Instaloader failed: {e}. Switching to Fallback...")
                 self.instaloader_active = False # Mark as dead
         
-        # --- Attempt 2: Instagrapi (Fallback) ---
+        if not self.instaloader_active:
+             logger.info("Primary Instaloader is inactive (or failed). Attempting Fallback...")
+        
+        # --- Attempt 2: Instagrapi ---
         if not self.instagrapi_active:
              try:
                  # DIRECTLY call the specific init method, avoid the setup_session loop

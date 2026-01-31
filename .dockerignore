@@ -1,0 +1,21 @@
+__pycache__
+venv
+env
+sp_env
+.git
+.gitignore
+.dockerignore
+Dockerfile
+docker-compose.yml
+pre_login.py
+README.md
+task.md
+SessionFiles/*
+!SessionFiles/.gitkeep
+webdata/csv uploads/*
+webdata/csv downloads/*
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.log
