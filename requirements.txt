@@ -6,3 +6,4 @@ instaloader
 requests
 vaderSentiment
 instagrapi
+apscheduler

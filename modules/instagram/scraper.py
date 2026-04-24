@@ -4,7 +4,7 @@ import os
 import time
 from instagrapi import Client
 from modules.configuration.config import Config
-from modules.instagram.auth import load_instaloader_session, load_instagrapi_session, get_instagrapi_session_path
+from modules.instagram.auth import load_instaloader_session, load_instagrapi_session, get_instagrapi_session_path, create_instaloader_session, create_instagrapi_session
 
 # Configure Logging
 logging.basicConfig(level=logging.INFO)
@@ -52,10 +52,13 @@ class InstagramScraper:
 # 2. Function to initialize Instaloader session
     def _init_instaloader_session(self):
         username = Config.INSTAGRAM_USERNAME
-        # Strict mode: No password used here.
         session_file = Config.SESSION_FILE
         
         self.instaloader_active = load_instaloader_session(self.L, username, session_file)
+        
+        if not self.instaloader_active and getattr(Config, 'ALLOW_DIRECT_LOGIN', False) and username and Config.INSTAGRAM_PASSWORD:
+            logger.info("Session load failed, attempting direct login for Instaloader...")
+            self.instaloader_active = create_instaloader_session(self.L, username, Config.INSTAGRAM_PASSWORD, session_file)
         
         if self.instaloader_active:
              self.warm_up_session(username)
@@ -63,26 +66,62 @@ class InstagramScraper:
 #---------------------------------------------------------------------------------
 # 3. Function to initialize Instagrapi session
     def _init_instagrapi_session(self):
-        # Strict mode: No password used here.
+        username = Config.INSTAGRAM_USERNAME
         session_file = Config.SESSION_FILE
         instagrapi_session_file = get_instagrapi_session_path(session_file)
         
         self.instagrapi_active = load_instagrapi_session(self.cl, instagrapi_session_file)
 
+        if not self.instagrapi_active and getattr(Config, 'ALLOW_DIRECT_LOGIN', False) and username and Config.INSTAGRAM_PASSWORD:
+            logger.info("Session load failed, attempting direct login for Instagrapi...")
+            self.instagrapi_active = create_instagrapi_session(self.cl, username, Config.INSTAGRAM_PASSWORD, instagrapi_session_file)
+
 #---------------------------------------------------------------------------------
 # 4. Function to warm up session
-    def warm_up_session(self, username):
+    def warm_up_session(self, username, retry=True):
         try:
             logger.info("Warming up Instaloader session...")
             instaloader.Profile.from_username(self.L.context, username)
             time.sleep(2)
             logger.info("Session warmed up.")
+            return True
         except Exception as e:
-            logger.warning(f"Warmup warning: {e}")
+            logger.warning(f"Warmup warning/failure: {e}")
+            self.instaloader_active = False
+            if retry and getattr(Config, 'ALLOW_DIRECT_LOGIN', False):
+                logger.info("Session dead during warmup. Attempting self-healing...")
+                if os.path.exists(Config.SESSION_FILE):
+                     os.remove(Config.SESSION_FILE)
+                self._init_instaloader_session()
+                return self.instaloader_active
+            return False
+
+    def warm_up_all_sessions(self):
+        """Called by background APScheduler to periodically test & refresh sessions."""
+        logger.info("=== Running Background Session Warmup ===")
+        if self.instaloader_active:
+            self.warm_up_session(Config.INSTAGRAM_USERNAME, retry=True)
+        else:
+            self._init_instaloader_session()
+            
+        if not self.instagrapi_active:
+            self._init_instagrapi_session()
+        else:
+            try:
+                 self.cl.get_timeline_feed()
+                 logger.info("Instagrapi Session warmed up.")
+            except Exception as e:
+                 logger.warning(f"Instagrapi warmup failed: {e}. Healing...")
+                 self.instagrapi_active = False
+                 if getattr(Config, 'ALLOW_DIRECT_LOGIN', False):
+                     instagrapi_session_file = get_instagrapi_session_path(Config.SESSION_FILE)
+                     if os.path.exists(instagrapi_session_file):
+                         os.remove(instagrapi_session_file)
+                     self._init_instagrapi_session()
 
 #---------------------------------------------------------------------------------
 # 5. Function to scrape comments
-    def scrape_comments(self, shortcode):
+    def scrape_comments(self, shortcode, retry=True):
         """
         Hybrid Scraping:
         1. Try Instaloader.
@@ -105,8 +144,18 @@ class InstagramScraper:
                 logger.info(f"Instaloader scraped {len(comments)} comments.")
                 return comments
             except Exception as e:
-                logger.warning(f"Instaloader failed: {e}. Switching to Fallback...")
+                logger.warning(f"Instaloader failed: {e}.")
                 self.instaloader_active = False # Mark as dead
+                
+                # --- Self-Healing ---
+                if retry and getattr(Config, 'ALLOW_DIRECT_LOGIN', False):
+                    logger.info("Instaloader session may be expired. Attempting self-healing...")
+                    if os.path.exists(Config.SESSION_FILE):
+                        os.remove(Config.SESSION_FILE)
+                    self._init_instaloader_session()
+                    if self.instaloader_active:
+                        logger.info("Self-healing successful. Retrying scrape...")
+                        return self.scrape_comments(shortcode, retry=False)
         
         if not self.instaloader_active:
              logger.info("Primary Instaloader is inactive (or failed). Attempting Fallback...")
@@ -140,6 +189,19 @@ class InstagramScraper:
                 return comments
             except Exception as e:
                  logger.error(f"Instagrapi also failed: {e}")
+                 self.instagrapi_active = False
+                 
+                 # --- Self-Healing ---
+                 if retry and getattr(Config, 'ALLOW_DIRECT_LOGIN', False):
+                     logger.info("Instagrapi session may be expired. Attempting self-healing...")
+                     instagrapi_session_file = get_instagrapi_session_path(Config.SESSION_FILE)
+                     if os.path.exists(instagrapi_session_file):
+                         os.remove(instagrapi_session_file)
+                     self._init_instagrapi_session()
+                     if self.instagrapi_active:
+                         logger.info("Self-healing successful. Retrying scrape...")
+                         return self.scrape_comments(shortcode, retry=False)
+                 
                  raise e
         
         return []

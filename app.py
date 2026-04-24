@@ -5,6 +5,8 @@ import logging
 from flask import Flask, render_template, request, jsonify, redirect, url_for, Response
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
+from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
 
 # Import modules
 from modules import process_csv_sentiment, InstagramScraper, Config 
@@ -17,6 +19,24 @@ CORS(app)
 
 # Global Scraper Placeholder
 scraper = None
+
+#=======================================    Background Job    =======================================
+def run_scraper_warmup():
+    """Background job to keep Instagram sessions alive"""
+    logging.info("Triggering scheduled scraper warmup...")
+    # Delay initial warmup slightly to ensure app is fully loaded
+    time.sleep(5) 
+    s = get_scraper()
+    if s:
+        s.warm_up_all_sessions()
+
+scheduler = BackgroundScheduler()
+# Run every 6 hours to keep session fresh
+scheduler.add_job(func=run_scraper_warmup, trigger="interval", hours=6)
+scheduler.start()
+
+# Shut down the scheduler when exiting the app
+atexit.register(lambda: scheduler.shutdown(wait=False))
 
 #=======================================    Helper Functions    =======================================
 # Function to load instagram scraper instance

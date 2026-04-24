@@ -45,6 +45,7 @@ class Config:
 
     INSTAGRAM_USERNAME = _clean_credential(_user)
     INSTAGRAM_PASSWORD = _clean_credential(_pass)
+    ALLOW_DIRECT_LOGIN = os.environ.get('ALLOW_DIRECT_LOGIN', '0').strip() in ('1', 'true', 'True')
 
     # User Agent
     USER_AGENT = 'Instagram 123.0.0.26.121 Android (28/9; 320dpi; 720x1280; Xiaomi; Redmi Note 7; lavender; qcom; en_US)'
