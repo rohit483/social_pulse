@@ -1,13 +1,9 @@
 # temoporary files for pushing to github
-*SessionFiles
-SessionFiles/
-instaloader_session
-instagrapi_session.json
 webdata
 *webdata
 webdata/
-webdata/csv%20downloads
-webdata/csv%20uploads
+webdata/csv downloads/
+webdata/csv uploads/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

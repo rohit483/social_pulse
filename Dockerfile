@@ -18,7 +18,7 @@ COPY . .
 
 # Create directory for session files (mounted volume will map here)
 # and webdata directories
-RUN mkdir -p SessionFiles webdata/csv\ uploads webdata/csv\ downloads 
+RUN mkdir -p webdata/csv\ uploads webdata/csv\ downloads 
 
 # Expose port
 EXPOSE 5000

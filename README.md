@@ -32,7 +32,6 @@ Whether you're a data enthusiast, a marketer, or just curious, Social Pulse make
 ```text
 social_pulse/
 ├── app.py                  # Main Flask Application
-├── pre_login.py            # Session Generator Script
 ├── Dockerfile              # Docker Image Config
 ├── docker-compose.yml      # Service Orchestration
 ├── nginx.conf              # Reverse Proxy Config
@@ -49,9 +48,8 @@ social_pulse/
 ├── webdata/                # Generated Reports & Uploads
 │   ├── csv uploads/
 │   └── csv downloads/
-├── sp_env/                 # Virtual Environment & Secrets (gitignored)
-│   └── .env                # Secrets file
-└── SessionFiles/           # Mounted Session Storage
+├── .env                    # Secrets file
+└── sp_env/                 # Virtual Environment (gitignored)
 ```
 
 ---
@@ -83,15 +81,16 @@ pip install -r requirements.txt
 
 ### 2. Configure Credentials
 
-Create a `.env` file in the `sp_env` folder (or root) and add your details:
+Create a `.env` file in the root directory and add your details:
 
 ```env
 SECRET_KEY=any-secret-string
 INSTAGRAM_USERNAME=your_username
-INSTAGRAM_PASSWORD="your_password"
-INSTAGRAM_SESSION_FILE=SessionFiles/instaloader_session
-# Note: Wrap password in single or double quotes to handle special characters (#, $)
+INSTAGRAPI_SESSION_B64=your_base64_string_here
+INSTALOADER_SESSION_B64=your_base64_string_here
 ```
+
+**Note**: To get these Base64 strings, use the external `insta_session` extraction tool to safely extract them from your local browser cookies. The app acts purely statelessly!
 
 ### 3. Run It!
 
@@ -109,17 +108,14 @@ Prefer containers? We've got you covered with a robust Nginx setup.
 
 **Note**: To protect your IP, we don't let the container login directly. You need to generate a session first.
 
-1. **Generate Session** (Run this on your computer):
+1. **Generate Sessions** (Locally):
+   Use the `insta_session` repository to extract your Chrome cookies and generate the B64 keys.
+2. **Set .env File**:
+   Paste `INSTAGRAPI_SESSION_B64` and `INSTALOADER_SESSION_B64` directly into your `.env`.
+3. **Run Container**:
 
    ```bash
-   python pre_login.py
-   ```
-
-   *This saves a secure session file to `./SessionFiles`.*
-2. **Run Container**:
-
-   ```bash
-   docker-compose up --build
+   docker-compose up --build -d
    ```
 
    The app will be accessible at **http://localhost** (Port 80).
@@ -128,12 +124,8 @@ Prefer containers? We've got you covered with a robust Nginx setup.
 
 ## 💡 Troubleshooting
 
-- **"Wrong Password"?**
-  Check your `.env` file. Make sure your password works by logging in on your phone first.
 - **Scraping failed?**
-  It happens! Wait a few minutes and try again. Our hybrid engine usually self-corrects.
-- **First Run Delay?**
-  The first login might take 5-10 seconds. Subsequent runs will use the saved session files and be instant.
+  It happens! Wait a few minutes and try again. Our hybrid engine usually self-corrects. If it consistently fails, you may need to extract fresh Base64 sessions using `insta_session`.
 
 ---
 

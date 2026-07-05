@@ -1,19 +1,15 @@
 version: '3.8'
 
 services:
-  web:
+  social-pulse:
     build: .
     ports:
       - "5000:5000"
     volumes:
-      - ./SessionFiles:/app/SessionFiles
       - ./webdata:/app/webdata
+      - ./.env:/app/.env
     env_file:
-      #- .env
-      #- venv/.env
-      - sp_env/.env
-    environment:
-      - INSTAGRAM_SESSION_FILE=SessionFiles/instaloader_session
+      - .env
     restart: always
 
   nginx:
@@ -23,7 +19,7 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - web
+      - social-pulse
 
 #  db:
 #    image: postgres:13

@@ -7,13 +7,20 @@ sp_env
 .dockerignore
 Dockerfile
 docker-compose.yml
-pre_login.py
+
+# Data Directories (we mount these as volumes)
+webdata/
+# Environments & Secrets
+.env
+.env.example
+
+# Documentation & Guides
 README.md
+SECURITY.md
+INSTAGRAM_SESSION_GUIDE.md
 task.md
-SessionFiles/*
-!SessionFiles/.gitkeep
-webdata/csv uploads/*
-webdata/csv downloads/*
+
+# Build & Logs
 *.pyc
 *.pyo
 *.pyd

@@ -1,165 +1,186 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const urlInput = document.getElementById('instaUrl');
-    const scrapeBtn = document.getElementById('scrapeBtn');
-    const downloadBtn = document.getElementById('downloadBtn');
-    const loadingMsg = document.getElementById('loadingMsg');
-    const successMsg = document.getElementById('successMsg');
-    const errorMsg = document.getElementById('errorMsg');
+// Store data globally to handle downloads
+let currentScrapeData = [];
+let currentUploadData = [];
 
-    const BACKEND_URL = 'http://127.0.0.1:5001';
+// --- Helper: Extract shortcode from Instagram URL or shortcode string
+function extractShortcode(input) {
+    if (!input) return input;
+    const regex = /instagram\.com\/(?:p|reel|reels)\/([a-zA-Z0-9_-]+)/;
+    const match = input.match(regex);
+    return match ? match[1] : input.trim();
+}
 
-    let commentsData = []; // To store fetched comments
-    let currentShortcode = ''; // To store the shortcode for the filename
+// --- Helper: Escape HTML to prevent XSS
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
 
-    const extractShortcode = (url) => {
-        if (!url || typeof url !== 'string') {
-            return null;
-        }
-        const regex = /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:p|reel|reels)\/([a-zA-Z0-9_-]+)\/?/;
-        const match = url.trim().match(regex);
-        return match ? match[1] : null;
-    };
+// --- Helper: Update Sentiment Summary
+function updateSummary(elementId, counts) {
+    const container = document.getElementById(elementId);
+    container.innerHTML = '';
+    for (const [sentiment, count] of Object.entries(counts)) {
+        const div = document.createElement('div');
+        div.className = `badge ${escapeHtml(sentiment.toLowerCase())}`;
+        div.innerHTML = `<strong>${escapeHtml(sentiment)}:</strong> ${escapeHtml(String(count))}`;
+        container.appendChild(div);
+    }
+}
 
-    const convertToCSV = (comments) => {
-        const header = 'Username,Comment\n';
-        const rows = comments
-          .map(c => {
-             const username = c.username ? c.username.replace(/"/g, '""') : '';
-             const commentText = c.comment ? c.comment.replace(/"/g, '""') : '';
-             const escapedUsername = `"${username}"`;
-             const escapedComment = `"${commentText}"`;
-             return `${escapedUsername},${escapedComment}`;
-            })
-          .join('\n');
-        return header + rows;
-    };
+// --- Helper: Populate Table (safe from XSS - uses textContent not innerHTML for data)
+function populateTable(tableId, data) {
+    const tbody = document.querySelector(`#${tableId} tbody`);
+    tbody.innerHTML = '';
+    data.forEach(item => {
+        const row = document.createElement('tr');
 
-    const showStatus = (type, message) => {
-        loadingMsg.classList.add('hidden');
-        successMsg.classList.add('hidden');
-        errorMsg.classList.add('hidden');
-        downloadBtn.classList.add('hidden');
-        downloadBtn.disabled = true;
-        scrapeBtn.disabled = false;
+        const usernameCell = document.createElement('td');
+        usernameCell.textContent = item.username || '';
 
-        if (type === 'loading') {
-            loadingMsg.textContent = message || 'Loading...';
-            loadingMsg.classList.remove('hidden');
-            scrapeBtn.disabled = true;
-        } else if (type === 'success') {
-            successMsg.textContent = message;
-            successMsg.classList.remove('hidden');
-            if (commentsData.length > 0) {
-                downloadBtn.classList.remove('hidden');
-                downloadBtn.disabled = false;
-                downloadBtn.querySelector('svg').style.display = 'inline-block';
-                downloadBtn.childNodes[downloadBtn.childNodes.length - 1].nodeValue = ` Download CSV (${commentsData.length})`;
-            }
-        } else if (type === 'error') {
-            errorMsg.textContent = message;
-            errorMsg.classList.remove('hidden');
-        }
-    };
+        const commentCell = document.createElement('td');
+        commentCell.textContent = item.comment || '';
 
-    scrapeBtn.addEventListener('click', async () => {
-        const url = urlInput.value;
-        commentsData = [];
-        currentShortcode = '';
-        showStatus('loading', 'Extracting shortcode...');
+        const sentimentCell = document.createElement('td');
+        const sentiment = item.sentiment || 'N/A';
+        const tag = document.createElement('span');
+        tag.className = `tag ${sentiment.toLowerCase()}`;
+        tag.textContent = sentiment;
+        sentimentCell.appendChild(tag);
 
-        const shortcode = extractShortcode(url);
-        currentShortcode = shortcode;
-
-        if (!shortcode) {
-            showStatus('error', 'Invalid Instagram URL. Please use a URL like https://www.instagram.com/p/SHORTCODE/');
-            return;
-        }
-
-        showStatus('loading', `Scraping comments for ${shortcode}...`);
-
-        scrapeBtn.disabled = true;
-
-        try {
-            const response = await fetch(`${BACKEND_URL}/scrape`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ shortcode }),
-            });
-
-            let result;
-            try {
-                result = await response.json();
-            } catch (e) {
-                throw new Error('Invalid JSON response from the server.');
-            }
-
-            if (!response.ok) {
-                throw new Error(result.error || `Server error: ${response.status} ${response.statusText}`);
-            }
-
-            commentsData = result;
-
-            if (commentsData.length === 0) {
-                showStatus('success', 'Scraping complete. No comments found.');
-            } else {
-                showStatus('success', `Successfully scraped ${commentsData.length} comments.`);
-            }
-
-        } catch (e) {
-            console.error("Scraping failed:", e);
-            let errorMessage = `Failed to scrape comments. ${e.message || 'Unknown error'}.`;
-            if (e.message && e.message.includes('Failed to fetch')) {
-                errorMessage += ` Is the backend server running at ${BACKEND_URL} and accessible? Check CORS configuration on the backend if domains differ.`;
-            }
-            if (e.message && e.message.includes('401')) {
-                errorMessage = 'Failed to scrape comments. Login is required to access comments of this post. Please ensure the backend is logged in.';
-            }
-            showStatus('error', errorMessage);
-        } finally {
-            scrapeBtn.disabled = false;
-        }
+        row.appendChild(usernameCell);
+        row.appendChild(commentCell);
+        row.appendChild(sentimentCell);
+        tbody.appendChild(row);
     });
+}
 
-    downloadBtn.addEventListener('click', () => {
-        if (!commentsData || commentsData.length === 0) {
-            showStatus('error', 'No comment data available to download.');
-            return;
+// --- Helper: Download Trigger
+async function triggerDownload(url, payload) {
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+            const blob = await response.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            const contentDisp = response.headers.get('Content-Disposition');
+            let filename = contentDisp ? contentDisp.split('filename=')[1] : 'download.csv';
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(downloadUrl);
+        } else {
+            const err = await response.json();
+            alert("Download failed: " + (err.error || "Unknown error"));
         }
-        if (!currentShortcode) {
-            currentShortcode = 'instagram_post';
+    } catch (e) {
+        alert("Download error: " + e);
+    }
+}
+
+// --- 1. Scraper Logic
+document.getElementById('scrape-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const input = document.getElementById('post-url').value;
+    const shortcode = extractShortcode(input);
+
+    const loading = document.getElementById('loading');
+    const errorMsg = document.getElementById('error-message');
+    const resultsSection = document.getElementById('scraper-results-section');
+
+    loading.style.display = 'block';
+    errorMsg.style.display = 'none';
+    resultsSection.style.display = 'none';
+
+    try {
+        const response = await fetch('/scrape', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ shortcode: shortcode })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            currentScrapeData = data.analyzed_comments;
+            updateSummary('scrape-sentiment-summary', data.sentiment_counts);
+            populateTable('scrape-results-table', currentScrapeData);
+            resultsSection.style.display = 'block';
+        } else {
+            errorMsg.textContent = data.error || "An error occurred.";
+            errorMsg.style.display = 'block';
         }
+    } catch (err) {
+        errorMsg.textContent = "Network or Server Error.";
+        errorMsg.style.display = 'block';
+    } finally {
+        loading.style.display = 'none';
+    }
+});
 
-        showStatus('loading', 'Generating CSV...');
+// --- Scraper Downloads
+document.getElementById('download-scrape-raw').addEventListener('click', () => {
+    const shortcode = extractShortcode(document.getElementById('post-url').value);
+    triggerDownload('/download_csv', { comments: currentScrapeData, shortcode: shortcode });
+});
 
-        try {
-            const csvData = convertToCSV(commentsData);
-            const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const blobUrl = URL.createObjectURL(blob);
+document.getElementById('download-scrape-analyzed').addEventListener('click', () => {
+    triggerDownload('/download_analyzed_csv', { comments: currentScrapeData, filename_prefix: 'scraped_analyzed' });
+});
 
-            link.href = blobUrl;
-            link.setAttribute('download', `instagram_comments_${currentShortcode}.csv`);
-            document.body.appendChild(link);
-            link.click();
+// --- 2. Upload Logic
+document.getElementById('upload-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const fileInput = document.getElementById('csv-file');
+    if (fileInput.files.length === 0) return;
 
-            document.body.removeChild(link);
-            URL.revokeObjectURL(blobUrl);
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
 
-            showStatus('success', `Successfully scraped ${commentsData.length} comments. CSV download initiated.`);
+    const loading = document.getElementById('upload-loading');
+    const errorMsg = document.getElementById('upload-error');
+    const resultsSection = document.getElementById('upload-results-section');
 
-        } catch (e) {
-             console.error("CSV Generation/Download failed:", e);
-             showStatus('error', `Failed to generate or download CSV: ${e.message}`);
+    loading.style.display = 'block';
+    errorMsg.style.display = 'none';
+    resultsSection.style.display = 'none';
+
+    try {
+        const response = await fetch('/analyze_upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            currentUploadData = data.comments;
+            updateSummary('upload-sentiment-summary', data.counts);
+            populateTable('upload-results-table', currentUploadData);
+            resultsSection.style.display = 'block';
+        } else {
+            errorMsg.textContent = data.error || "Analysis failed.";
+            errorMsg.style.display = 'block';
         }
-    });
+    } catch (err) {
+        errorMsg.textContent = "Upload failed: " + err;
+        errorMsg.style.display = 'block';
+    } finally {
+        loading.style.display = 'none';
+    }
+});
 
-    scrapeBtn.disabled = !urlInput.value.trim();
-    urlInput.addEventListener('input', () => {
-        scrapeBtn.disabled = !urlInput.value.trim();
-        if (urlInput.value.trim()) {
-             showStatus('clear');
-        }
-    });
+document.getElementById('download-upload-analyzed').addEventListener('click', () => {
+    triggerDownload('/download_analyzed_csv', { comments: currentUploadData, filename_prefix: 'uploaded_analyzed' });
 });

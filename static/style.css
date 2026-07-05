@@ -253,3 +253,39 @@ th {
     background-color: #f8f9fa;
     color: var(--secondary-color);
 }
+
+/* -------------------------------------
+   Utility & Structural Classes 
+   ------------------------------------- */
+
+.subtitle-text {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.sentiment-summary {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.table-container {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-top: 10px;
+}
+
+summary {
+    cursor: pointer;
+    color: var(--secondary-color);
+    font-weight: 600;
+}
+
+.mb-20 {
+    margin-bottom: 20px;
+}
+
+.mt-15 {
+    margin-top: 15px;
+}

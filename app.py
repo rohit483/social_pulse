@@ -4,12 +4,13 @@ import pandas as pd
 import logging
 from flask import Flask, render_template, request, jsonify, redirect, url_for, Response
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from werkzeug.utils import secure_filename
-from apscheduler.schedulers.background import BackgroundScheduler
-import atexit
 
 # Import modules
 from modules import process_csv_sentiment, InstagramScraper, Config 
+from functools import wraps
 
 #=======================================    App    =======================================
 # Initialize App
@@ -17,26 +18,16 @@ app = Flask(__name__)
 Config.init_app(app)
 CORS(app)
 
+# Rate limiter - keyed by remote IP
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=[],  # No global limit; apply per-route
+    storage_uri="memory://"
+)
+
 # Global Scraper Placeholder
 scraper = None
-
-#=======================================    Background Job    =======================================
-def run_scraper_warmup():
-    """Background job to keep Instagram sessions alive"""
-    logging.info("Triggering scheduled scraper warmup...")
-    # Delay initial warmup slightly to ensure app is fully loaded
-    time.sleep(5) 
-    s = get_scraper()
-    if s:
-        s.warm_up_all_sessions()
-
-scheduler = BackgroundScheduler()
-# Run every 6 hours to keep session fresh
-scheduler.add_job(func=run_scraper_warmup, trigger="interval", hours=6)
-scheduler.start()
-
-# Shut down the scheduler when exiting the app
-atexit.register(lambda: scheduler.shutdown(wait=False))
 
 #=======================================    Helper Functions    =======================================
 # Function to load instagram scraper instance
@@ -58,6 +49,10 @@ def get_scraper():
 # Global Error Handler
 @app.errorhandler(Exception)
 def handle_exception(e):
+    from werkzeug.exceptions import NotFound
+    if isinstance(e, NotFound):
+        return jsonify({"error": "Not Found"}), 404
+        
     logging.error(f"Global Error: {e}")
     # Return JSON instead of HTML for API errors
     return jsonify({"error": str(e)}), 500
@@ -71,6 +66,7 @@ def home():
 #-----------------------------------------------------------------------------------
 # --- 2. Sentiment Analysis Routes ---
 @app.route('/analyze_upload', methods=['POST'])
+@limiter.limit("30 per minute")
 def analyze_upload(): 
     if 'file' not in request.files:
          return jsonify({"error": "No file part"}), 400     
@@ -100,6 +96,7 @@ def analyze_upload():
 #-----------------------------------------------------------------------------------
 # --- 3. Instagram Scraping Routes ---
 @app.route('/scrape', methods=['POST'])
+@limiter.limit("10 per minute")
 def scrape_comments_route():
     if not request.is_json:
         return jsonify({"error": "Request must be JSON"}), 400
@@ -114,7 +111,21 @@ def scrape_comments_route():
     if not scraper_service:
         return jsonify({"error": "Scraper service unavailable"}), 503
 
-    comments = scraper_service.scrape_comments(shortcode)
+    # Check session health - if both inactive, try refresh
+    if not scraper_service.instagrapi_active and not scraper_service.instaloader_active:
+        logging.warning("Sessions inactive before scrape. Attempting refresh...")
+        scraper_service.setup_session()
+        
+        if not scraper_service.instagrapi_active and not scraper_service.instaloader_active:
+            return jsonify({
+                "error": "No active sessions available. Please refresh sessions manually via /admin/refresh-session"
+            }), 503
+
+    try:
+        comments = scraper_service.scrape_comments(shortcode)
+    except Exception as e:
+        logging.error(f"Scraping failed: {e}")
+        return jsonify({"error": f"Scraping failed: {str(e)}"}), 500
     
     # Perform Sentiment Analysis immediately
     df_temp = pd.DataFrame(comments)
@@ -186,6 +197,72 @@ def download_analyzed_csv_route():
         mimetype="text/csv",
         headers={"Content-Disposition": f"attachment;filename={saved_filename}"}
     )
+
+#=======================================    Admin Security    =======================================
+def require_admin_token(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get('X-Admin-Token', '')
+        if not token or token != Config.SECRET_KEY:
+            return jsonify({"error": "Unauthorized"}), 401
+        return f(*args, **kwargs)
+    return decorated
+
+#-----------------------------------------------------------------------------------
+# --- 6. Admin Session Management Routes ---
+@app.route('/admin/check-session', methods=['GET'])
+@require_admin_token
+def check_session():
+    """Check if sessions are active and healthy"""
+    scraper_service = get_scraper()
+    if not scraper_service:
+        return jsonify({
+            "status": "error",
+            "message": "Scraper not initialized"
+        }), 503
+    
+    return jsonify({
+        "status": "ok",
+        "instagrapi_active": scraper_service.instagrapi_active,
+        "instaloader_active": scraper_service.instaloader_active,
+        "message": "Session check complete"
+    })
+
+#-----------------------------------------------------------------------------------
+@app.route('/admin/refresh-session', methods=['POST'])
+@require_admin_token
+def refresh_session():
+    """Manually trigger session refresh/re-initialization"""
+    global scraper
+    
+    logging.info("Manual session refresh triggered by admin...")
+    
+    try:
+        # Force re-initialization
+        scraper = None
+        scraper_service = get_scraper()
+        
+        if scraper_service and (scraper_service.instagrapi_active or scraper_service.instaloader_active):
+            return jsonify({
+                "status": "success",
+                "message": "Session refreshed successfully",
+                "instagrapi_active": scraper_service.instagrapi_active,
+                "instaloader_active": scraper_service.instaloader_active
+            })
+        else:
+            return jsonify({
+                "status": "partial",
+                "message": "Session refresh attempted but no active sessions",
+                "instagrapi_active": False,
+                "instaloader_active": False
+            }), 503
+            
+    except Exception as e:
+        logging.error(f"Session refresh failed: {e}")
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
 #============================================   Main   =======================================
 if __name__ == '__main__':

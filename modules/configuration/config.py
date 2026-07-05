@@ -1,25 +1,19 @@
 import os
+import logging
 from dotenv import load_dotenv
 
+
 #=======================================    Environment    =======================================
-# Load environment variables from common directory names
-possible_env_dirs = ['sp_env', 'venv', 'env']
-env_loaded = False
-
-for env_dir in possible_env_dirs:
-    env_path = os.path.join(os.getcwd(), env_dir, '.env')
-    if os.path.exists(env_path):
-        load_dotenv(env_path)
-        env_loaded = True
-        break
-
-if not env_loaded:
-    load_dotenv() # Fallback to default .env in root
+# Load environment variables from the root directory
+load_dotenv()
 
 #=======================================    Config    =======================================
 # Config class for application configuration
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-key-please-change'
+    # API Keys & Secrets
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-123'
+    OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
+    HUGGINGFACE_API_KEY = os.environ.get('HUGGINGFACE_API_KEY')
 
     # Base directory for the application
     BASE_DIR = os.getcwd()
@@ -28,59 +22,29 @@ class Config:
     UPLOAD_FOLDER = os.path.join(os.getcwd(), 'webdata', 'csv uploads')
     DOWNLOAD_FOLDER = os.environ.get('DOWNLOAD_FOLDER') or os.path.join(os.getcwd(), 'webdata', 'csv downloads')
 
-    # Instagram Credentials Call from .env file
-    _user = os.environ.get('INSTAGRAM_USERNAME', '').strip()
-    _pass = os.environ.get('INSTAGRAM_PASSWORD', '').strip()
-
-    # Function to clean credentials
-    def _clean_credential(value):
-        if not value:
-            return None
-        # Loop to remove multiple layers of quotes if present (e.g. "'pass'")
-        cleaned = value.strip()
-        while (cleaned.startswith('"') and cleaned.endswith('"')) or \
-              (cleaned.startswith("'") and cleaned.endswith("'")):
-            cleaned = cleaned[1:-1]
-        return cleaned
-
-    INSTAGRAM_USERNAME = _clean_credential(_user)
-    INSTAGRAM_PASSWORD = _clean_credential(_pass)
-    ALLOW_DIRECT_LOGIN = os.environ.get('ALLOW_DIRECT_LOGIN', '0').strip() in ('1', 'true', 'True')
+    INSTAGRAM_USERNAME = os.environ.get('INSTAGRAM_USERNAME', '').strip() or None
 
     # User Agent
     USER_AGENT = 'Instagram 123.0.0.26.121 Android (28/9; 320dpi; 720x1280; Xiaomi; Redmi Note 7; lavender; qcom; en_US)'
 
     # Validation & Debugging
-    import logging
     _logger = logging.getLogger(__name__)
 
-    if INSTAGRAM_PASSWORD:
-        _masked_pass = INSTAGRAM_PASSWORD[0] + "*" * (len(INSTAGRAM_PASSWORD)-2) + INSTAGRAM_PASSWORD[-1] if len(INSTAGRAM_PASSWORD) > 2 else "***"
-        _logger.info(f"Config Loaded Username: {INSTAGRAM_USERNAME}")
-        _logger.info(f"Config Loaded Password: {_masked_pass} (Length: {len(INSTAGRAM_PASSWORD)})")
-        if len(INSTAGRAM_PASSWORD) < 5:
-            _logger.warning("⚠️ Password length is suspiciously short! Check .env formatting.")
-
     # Validation: Log warning if credentials are missing
-    if not INSTAGRAM_USERNAME or not INSTAGRAM_PASSWORD:
-        _logger.warning("Instagram credentials not found in environment variables!")
+    if not INSTAGRAM_USERNAME:
+        _logger.warning("Instagram username not found in environment variables!")
     
-    # Paths to session file
-    SESSION_FILE = os.environ.get('INSTAGRAM_SESSION_FILE') or os.path.join(BASE_DIR, 'SessionFiles', 'instaloader_session')
+    # ── Session Management ─────────────────────────────────────────────────────
+    # Sessions are exclusively loaded from Base64 environment variables
+    # (INSTALOADER_SESSION_B64 and INSTAGRAPI_SESSION_B64). No local files are used.
+
 
     # Comment limit
     MAX_COMMENTS = 200
     
-    # Static method to initialize app
+    #=======================================   Create directories    =======================================
+    # Static method to initialize app - Create upload and download folders if they don't exist
     @staticmethod
-
-#=======================================   Create directories    =======================================
-    # Create upload and download folders if they don't exist
     def init_app(app):
         os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
         os.makedirs(Config.DOWNLOAD_FOLDER, exist_ok=True)
-        
-        # Ensure session directory exists
-        session_dir = os.path.dirname(Config.SESSION_FILE)
-        if session_dir: # Check if path is not empty
-            os.makedirs(session_dir, exist_ok=True)
