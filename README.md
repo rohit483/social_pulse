@@ -15,7 +15,6 @@ Whether you're a data enthusiast, a marketer, or just curious, Social Pulse make
   - **Fallback**: `instagrapi` (Mimics mobile API, highly resistant to bot detection).
 - **Auto-Failover**: If the primary engine encounters a "Login Required" or connection error, the system automatically switches to the fallback engine without crashing.
 - **Robust Session Management**: Maintains separate session files for each engine to ensure stability.
-- **Session Warm-up**: Automatically "warms up" fresh sessions with dummy API calls to prevent "Something went wrong" errors on the first scrape.
 - **Lazy Loading**: Scraper resources are only initialized when the scrape button is clicked, ensuring instant app startup.
 
 ### 🧠 Advanced Sentiment Analysis
@@ -34,98 +33,53 @@ social_pulse/
 ├── app.py                  # Main Flask Application
 ├── Dockerfile              # Docker Image Config
 ├── docker-compose.yml      # Service Orchestration
-├── nginx.conf              # Reverse Proxy Config
+├── entrypoint.sh           # Automated Boot Script
+├── extract_sessions.py     # Automated Cookie Parser
 ├── requirements.txt        # Project Dependencies
 ├── modules/                # Core Logic Modules
+│   ├── database/           # PostgreSQL DB Models
 │   ├── analysis/           # Sentiment Analysis Engine
 │   ├── configuration/      # Config & Env Management
 │   └── instagram/          # Scraper & Login Logic
 ├── static/                 # CSS, JS & Assets
-│   ├── style.css
-│   └── script.js
 ├── templates/              # HTML Templates
-│   └── index.html
-├── webdata/                # Generated Reports & Uploads
-│   ├── csv uploads/
-│   └── csv downloads/
-├── .env                    # Secrets file
-└── sp_env/                 # Virtual Environment (gitignored)
+├── cookie.json             # Your Instagram cookies (gitignored)
+└── troubleshooting.md      # Solutions to common errors
 ```
 
 ---
 
-## 🛠️ Quick Start (Local)
+## 🐳 Quick Start (Docker)
 
-Run Social Pulse on your machine in minutes.
+To protect your IP and make deployment seamless, Social Pulse is designed to run in Docker and automatically extract sessions from your local browser cookies.
 
-### Prerequisites
+### 1. Export Cookies from Chrome (Authentication)
 
-- Python 3.10 or higher
-- An Instagram account (for scraping)
+Instagram blocks automated logins from servers. To get around this, we **extract sessions locally** where Instagram trusts your IP address.
 
-### 1. Setup
+1. Install the **[EditThisCookie](https://chrome.google.com/webstore/detail/editthiscookie/fngmhnnpilhplaeedifhccceomclgfbg)** or **[J2Team Cookies](https://chrome.google.com/webstore/detail/j2team-cookies/jjpjijpjndedcempgkndkhaenkeeniha)** Chrome extension.
+2. Go to [instagram.com](https://www.instagram.com/) and log into a **burner account**.
+3. Open the extension and click the **"Export"** button (which copies the cookies to your clipboard in JSON format).
+4. Open a text editor, paste the contents, and save the file exactly as `cookie.json` in the root folder of this project.
 
-```bash
-# Clone the repo
-git clone https://github.com/rohit483/social_pulse.git
-cd social_pulse
-
-# Create a virtual environment
-python -m venv venv
-.\venv\Scripts\activate  # Windows
-# source venv/bin/activate # Mac/Linux
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-### 2. Configure Credentials
-
-Create a `.env` file in the root directory and add your details:
-
-```env
-SECRET_KEY=any-secret-string
-INSTAGRAM_USERNAME=your_username
-INSTAGRAPI_SESSION_B64=your_base64_string_here
-INSTALOADER_SESSION_B64=your_base64_string_here
-```
-
-**Note**: To get these Base64 strings, use the external `insta_session` extraction tool to safely extract them from your local browser cookies. The app acts purely statelessly!
-
-### 3. Run It!
+### 2. Boot the Application
 
 ```bash
-python app.py
+# Boot the database, proxy, and backend
+docker-compose up
 ```
 
-Open `http://localhost:5000` in your browser.
+**That's it!** 
+When the container starts, it will automatically detect your `cookie.json` file, extract the `instagrapi` and `instaloader` sessions, inject them into your environment, and start the app. 
 
----
-
-## 🐳 Docker (Optional)
-
-Prefer containers? We've got you covered with a robust Nginx setup.
-
-**Note**: To protect your IP, we don't let the container login directly. You need to generate a session first.
-
-1. **Generate Sessions** (Locally):
-   Use the `insta_session` repository to extract your Chrome cookies and generate the B64 keys.
-2. **Set .env File**:
-   Paste `INSTAGRAPI_SESSION_B64` and `INSTALOADER_SESSION_B64` directly into your `.env`.
-3. **Run Container**:
-
-   ```bash
-   docker-compose up --build -d
-   ```
-
-   The app will be accessible at **http://localhost** (Port 80).
+Open `http://localhost` (or Port 80) in your browser.
 
 ---
 
 ## 💡 Troubleshooting
 
-- **Scraping failed?**
-  It happens! Wait a few minutes and try again. Our hybrid engine usually self-corrects. If it consistently fails, you may need to extract fresh Base64 sessions using `insta_session`.
+Having issues with `cookie.json`, database connections, or UI glitches?
+👉 **Please check out the [Troubleshooting Guide](troubleshooting.md) for quick fixes!**
 
 ---
 
@@ -143,8 +97,8 @@ Contributions are what make the open source community such an amazing place to l
 
 ## 🔮 Future Roadmap
 
+- [x] **Database Integration**: Migrated from CSV to PostgreSQL!
 - [ ] **Multi-Platform Support**: Architecture ready for Facebook & Twitter modules.
-- [ ] **Database Integration**: Migrate from CSV to SQLite/PostgreSQL.
 - [ ] **Visual Dashboards**: Add chart.js visualizations for sentiment trends.
 
 ---

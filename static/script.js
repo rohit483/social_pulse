@@ -1,5 +1,6 @@
 // Store data globally to handle downloads
 let currentScrapeData = [];
+let currentRawScrapeData = [];
 let currentUploadData = [];
 
 // --- Helper: Extract shortcode from Instagram URL or shortcode string
@@ -115,6 +116,7 @@ document.getElementById('scrape-form').addEventListener('submit', async function
 
         if (response.ok) {
             currentScrapeData = data.analyzed_comments;
+            currentRawScrapeData = data.comments;
             updateSummary('scrape-sentiment-summary', data.sentiment_counts);
             populateTable('scrape-results-table', currentScrapeData);
             resultsSection.style.display = 'block';
@@ -133,11 +135,11 @@ document.getElementById('scrape-form').addEventListener('submit', async function
 // --- Scraper Downloads
 document.getElementById('download-scrape-raw').addEventListener('click', () => {
     const shortcode = extractShortcode(document.getElementById('post-url').value);
-    triggerDownload('/download_csv', { comments: currentScrapeData, shortcode: shortcode });
+    triggerDownload('/download_csv', { comments: currentRawScrapeData, shortcode: shortcode });
 });
 
 document.getElementById('download-scrape-analyzed').addEventListener('click', () => {
-    triggerDownload('/download_analyzed_csv', { comments: currentScrapeData, filename_prefix: 'scraped_analyzed' });
+    triggerDownload('/download_analyzed_csv', { comments: currentScrapeData, filename_prefix: 'Analyzed_Instagram_Comments' });
 });
 
 // --- 2. Upload Logic
@@ -182,5 +184,5 @@ document.getElementById('upload-form').addEventListener('submit', async function
 });
 
 document.getElementById('download-upload-analyzed').addEventListener('click', () => {
-    triggerDownload('/download_analyzed_csv', { comments: currentUploadData, filename_prefix: 'uploaded_analyzed' });
+    triggerDownload('/download_analyzed_csv', { comments: currentUploadData, filename_prefix: 'Analyzed_Custom_Upload' });
 });

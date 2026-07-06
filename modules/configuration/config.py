@@ -25,7 +25,7 @@ class Config:
     INSTAGRAM_USERNAME = os.environ.get('INSTAGRAM_USERNAME', '').strip() or None
 
     # User Agent
-    USER_AGENT = 'Instagram 123.0.0.26.121 Android (28/9; 320dpi; 720x1280; Xiaomi; Redmi Note 7; lavender; qcom; en_US)'
+    USER_AGENT = os.environ.get('INSTAGRAM_USER_AGENT', 'Instagram 123.0.0.26.121 Android (28/9; 320dpi; 720x1280; Xiaomi; Redmi Note 7; lavender; qcom; en_US)')
 
     # Validation & Debugging
     _logger = logging.getLogger(__name__)
@@ -41,6 +41,16 @@ class Config:
 
     # Comment limit
     MAX_COMMENTS = 200
+
+    # ── Database Management ────────────────────────────────────────────────────
+    POSTGRES_USER = os.environ.get('POSTGRES_USER', 'user')
+    POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', 'password')
+    POSTGRES_DB = os.environ.get('POSTGRES_DB', 'social_pulse')
+    POSTGRES_HOST = os.environ.get('POSTGRES_HOST', 'db')
+    POSTGRES_PORT = os.environ.get('POSTGRES_PORT', '5432')
+    
+    SQLALCHEMY_DATABASE_URI = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     #=======================================   Create directories    =======================================
     # Static method to initialize app - Create upload and download folders if they don't exist

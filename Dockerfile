@@ -23,5 +23,9 @@ RUN mkdir -p webdata/csv\ uploads webdata/csv\ downloads
 # Expose port
 EXPOSE 5000
 
-# Run the application
-CMD ["python", "app.py"]
+# Copy entrypoint script and make it executable
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+# Run the application using entrypoint
+CMD ["/app/entrypoint.sh"]

@@ -13,12 +13,14 @@ webdata/
 # Environments & Secrets
 .env
 .env.example
+*.env
 
 # Documentation & Guides
 README.md
 SECURITY.md
 INSTAGRAM_SESSION_GUIDE.md
 task.md
+*.md
 
 # Build & Logs
 *.pyc

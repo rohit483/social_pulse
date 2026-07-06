@@ -10,20 +10,29 @@ from werkzeug.utils import secure_filename
 
 # Import modules
 from modules import process_csv_sentiment, InstagramScraper, Config 
+from modules.database.models import db, InstagramScrape, InstagramComment, CsvUpload, CsvComment
 from functools import wraps
 
 #=======================================    App    =======================================
 # Initialize App
 app = Flask(__name__)
 Config.init_app(app)
-CORS(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = Config.SQLALCHEMY_DATABASE_URI
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = Config.SQLALCHEMY_TRACK_MODIFICATIONS
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # SEC-04: Limit uploads to 10 MB
+db.init_app(app)
+with app.app_context():
+    db.create_all()
 
-# Rate limiter - keyed by remote IP
+# SEC-06: Restrict CORS to known origins (configurable via ALLOWED_ORIGINS in .env)
+CORS(app, origins=os.environ.get('ALLOWED_ORIGINS', 'http://localhost,http://localhost:5000').split(','))
+
+# SEC-07: Rate limiter - use Redis in production if REDIS_URL is set, else fall back to memory
 limiter = Limiter(
     get_remote_address,
     app=app,
     default_limits=[],  # No global limit; apply per-route
-    storage_uri="memory://"
+    storage_uri=os.environ.get('REDIS_URL', 'memory://')
 )
 
 # Global Scraper Placeholder
@@ -53,9 +62,9 @@ def handle_exception(e):
     if isinstance(e, NotFound):
         return jsonify({"error": "Not Found"}), 404
         
-    logging.error(f"Global Error: {e}")
-    # Return JSON instead of HTML for API errors
-    return jsonify({"error": str(e)}), 500
+    logging.error(f"Global Error: {e}", exc_info=True)
+    # SEC-11: Return generic JSON instead of leaking internal exceptions
+    return jsonify({"error": "An internal server error occurred."}), 500
 
 #=======================================    Routes    =======================================
 # --- 1. Home Routes ---
@@ -85,6 +94,24 @@ def analyze_upload():
         if error:
             return jsonify({"error": error}), 500
             
+        # Save to database
+        try:
+            upload_job = CsvUpload(filename=filename)
+            db.session.add(upload_job)
+            db.session.flush()
+            for c in comments:
+                db.session.add(CsvComment(
+                    upload_id=upload_job.id, 
+                    username=c.get('username', 'unknown'), 
+                    text=c.get('comment', ''), 
+                    sentiment=c.get('sentiment', 'N/A')
+                ))
+            db.session.commit()
+            logging.info(f"Saved CSV upload {filename} to database with ID {upload_job.id}")
+        except Exception as db_err:
+            logging.error(f"Failed to save CSV to DB: {db_err}")
+            db.session.rollback()
+            
         return jsonify({
             "counts": counts,
             "comments": comments,
@@ -104,8 +131,10 @@ def scrape_comments_route():
     data = request.get_json()
     shortcode = data.get('shortcode')
 
-    if not shortcode:
-        return jsonify({"error": "Missing 'shortcode'"}), 400
+    import re
+    # SEC-09: Validate shortcode format and length to prevent malicious input
+    if not shortcode or not isinstance(shortcode, str) or not re.match(r'^[a-zA-Z0-9_-]{1,30}$', shortcode):
+        return jsonify({"error": "Invalid shortcode format"}), 400
 
     scraper_service = get_scraper()
     if not scraper_service:
@@ -137,6 +166,24 @@ def scrape_comments_route():
             df_temp['sentiment'] = df_temp['comment'].apply(analyze_sentiment_text)
             analyzed_comments = df_temp.to_dict(orient='records')
             sentiment_counts = df_temp['sentiment'].value_counts().to_dict()
+            
+    # Save to database
+    try:
+        scrape_job = InstagramScrape(shortcode=shortcode)
+        db.session.add(scrape_job)
+        db.session.flush()
+        for c in analyzed_comments:
+            db.session.add(InstagramComment(
+                scrape_id=scrape_job.id, 
+                username=c.get('username', 'unknown'), 
+                text=c.get('comment', ''), 
+                sentiment=c.get('sentiment', 'N/A')
+            ))
+        db.session.commit()
+        logging.info(f"Saved scrape for {shortcode} to database with ID {scrape_job.id}")
+    except Exception as db_err:
+        logging.error(f"Failed to save scrape to DB: {db_err}")
+        db.session.rollback()
 
     return jsonify({
         "comments": comments,
@@ -165,7 +212,7 @@ def download_csv_route():
     return Response(
         df.to_csv(index=False),
         mimetype="text/csv",
-        headers={"Content-Disposition": f"attachment;filename=instagram_comments_{shortcode}.csv"}
+        headers={"Content-Disposition": f"attachment;filename=Raw_Instagram_Comments_{shortcode}.csv"}
     )
 
 #-----------------------------------------------------------------------------------
@@ -177,7 +224,10 @@ def download_analyzed_csv_route():
 
     data = request.get_json()
     comments = data.get('comments') 
-    filename_prefix = data.get('filename_prefix', 'analyzed_data')
+    # SEC-03: Sanitize filename_prefix to prevent path traversal / header injection
+    import re
+    raw_prefix = data.get('filename_prefix', 'analyzed_data')
+    filename_prefix = re.sub(r'[^a-zA-Z0-9_\-]', '_', raw_prefix)[:50]
 
     if not isinstance(comments, list) or not comments:
         return jsonify({"error": "Invalid or empty 'comments' list"}), 400
@@ -202,7 +252,7 @@ def download_analyzed_csv_route():
 def require_admin_token(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = request.headers.get('X-Admin-Token', '')
+        token = request.headers.get('X-Admin-Token') or request.args.get('X-Admin-Token', '')
         if not token or token != Config.SECRET_KEY:
             return jsonify({"error": "Unauthorized"}), 401
         return f(*args, **kwargs)
@@ -266,4 +316,6 @@ def refresh_session():
 
 #============================================   Main   =======================================
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # SEC-05: Read debug mode from env — never run debug=True in production!
+    debug_mode = os.environ.get('FLASK_DEBUG', '0') == '1'
+    app.run(host='0.0.0.0', port=5000, debug=debug_mode)

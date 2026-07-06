@@ -6,11 +6,13 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./webdata:/app/webdata
       - ./.env:/app/.env
+      - ./cookie.json:/app/cookie.json
     env_file:
       - .env
     restart: always
+    depends_on:
+      - db
 
   nginx:
     image: nginx:alpine
@@ -21,14 +23,15 @@ services:
     depends_on:
       - social-pulse
 
-#  db:
-#    image: postgres:13
-#    environment:
-#      POSTGRES_USER: user
-#      POSTGRES_PASSWORD: password
-#      POSTGRES_DB: social_pulse
-#    volumes:
-#      - postgres_data:/var/lib/postgresql/data
+  db:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
 
-#volumes:
-#  postgres_data:
+volumes:
+  postgres_data:

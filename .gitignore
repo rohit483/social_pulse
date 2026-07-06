@@ -4,6 +4,8 @@ webdata
 webdata/
 webdata/csv downloads/
 webdata/csv uploads/
+cookie.json
+*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -148,6 +150,9 @@ ENV/
 env.bak/
 venv.bak/
 sp_env/
+*.env
+.env.prod
+.env.prod.example
 
 # Spyder project settings
 .spyderproject
