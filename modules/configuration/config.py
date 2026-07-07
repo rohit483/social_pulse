@@ -43,13 +43,19 @@ class Config:
     MAX_COMMENTS = 200
 
     # ── Database Management ────────────────────────────────────────────────────
-    POSTGRES_USER = os.environ.get('POSTGRES_USER', 'user')
-    POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', 'password')
-    POSTGRES_DB = os.environ.get('POSTGRES_DB', 'social_pulse')
-    POSTGRES_HOST = os.environ.get('POSTGRES_HOST', 'db')
-    POSTGRES_PORT = os.environ.get('POSTGRES_PORT', '5432')
-    
-    SQLALCHEMY_DATABASE_URI = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+    DATABASE_URL = os.environ.get('DATABASE_URL')
+    if DATABASE_URL:
+        if DATABASE_URL.startswith("postgres://"):
+            DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+        SQLALCHEMY_DATABASE_URI = DATABASE_URL
+    else:
+        POSTGRES_USER = os.environ.get('POSTGRES_USER', 'user')
+        POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', 'password')
+        POSTGRES_DB = os.environ.get('POSTGRES_DB', 'social_pulse')
+        POSTGRES_HOST = os.environ.get('POSTGRES_HOST', 'db')
+        POSTGRES_PORT = os.environ.get('POSTGRES_PORT', '5432')
+        
+        SQLALCHEMY_DATABASE_URI = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     #=======================================   Create directories    =======================================
