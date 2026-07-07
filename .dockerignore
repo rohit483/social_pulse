@@ -7,6 +7,9 @@ sp_env
 .dockerignore
 Dockerfile
 docker-compose.yml
+agent-context/
+*agent-context
+LICENSE
 
 # Data Directories (we mount these as volumes)
 webdata/
@@ -28,3 +31,5 @@ task.md
 *.pyd
 .Python
 *.log
+# *.yml
+.github

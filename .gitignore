@@ -6,6 +6,8 @@ webdata/csv downloads/
 webdata/csv uploads/
 cookie.json
 *.json
+agent-context/
+*agent-context
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

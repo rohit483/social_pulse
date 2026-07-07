@@ -3,6 +3,26 @@ let currentScrapeData = [];
 let currentRawScrapeData = [];
 let currentUploadData = [];
 
+// --- Theme Toggle Logic ---
+const themeToggle = document.getElementById('theme-toggle');
+const currentTheme = localStorage.getItem('theme');
+
+// Apply saved theme on load
+if (currentTheme) {
+    document.documentElement.setAttribute('data-theme', currentTheme);
+}
+
+themeToggle.addEventListener('click', () => {
+    let theme = document.documentElement.getAttribute('data-theme');
+    // If no explicit theme is set yet, check the OS preference
+    if (!theme) {
+        theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+});
+
 // --- Helper: Extract shortcode from Instagram URL or shortcode string
 function extractShortcode(input) {
     if (!input) return input;

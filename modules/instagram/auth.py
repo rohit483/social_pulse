@@ -86,7 +86,7 @@ def load_instagrapi_session(cl):
         if session_from_env:
             tmp_path = None
             try:
-                # Write to a proper temp file and guarantee cleanup (fixes SEC-02)
+                # Write to a proper temp file and guarantee cleanup
                 with tempfile.NamedTemporaryFile(mode='w', suffix='_ig_session.json',
                                                  delete=False) as tmp:
                     json.dump(session_from_env, tmp)

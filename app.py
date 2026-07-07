@@ -1,7 +1,17 @@
 import os
+import logging
+
+# --- Bootstrapping: Auto-extract sessions from cookie.json if provided (Dev Only) ---
+if os.path.exists("cookie.json") and os.path.getsize("cookie.json") > 10:
+    print("Running session extraction from cookie.json...")
+    try:
+        from extract_sessions import generate_from_json
+        generate_from_json()
+    except Exception as e:
+        print(f"Warning: Session extraction failed: {e}")
+
 import time
 import pandas as pd
-import logging
 from flask import Flask, render_template, request, jsonify, redirect, url_for, Response
 from flask_cors import CORS
 from flask_limiter import Limiter
@@ -19,15 +29,15 @@ app = Flask(__name__)
 Config.init_app(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = Config.SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = Config.SQLALCHEMY_TRACK_MODIFICATIONS
-app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # SEC-04: Limit uploads to 10 MB
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
 db.init_app(app)
 with app.app_context():
     db.create_all()
 
-# SEC-06: Restrict CORS to known origins (configurable via ALLOWED_ORIGINS in .env)
+# Restrict CORS to known origins (configurable via ALLOWED_ORIGINS in .env)
 CORS(app, origins=os.environ.get('ALLOWED_ORIGINS', 'http://localhost,http://localhost:5000').split(','))
 
-# SEC-07: Rate limiter - use Redis in production if REDIS_URL is set, else fall back to memory
+# Rate limiter - use Redis in production if REDIS_URL is set, else fall back to memory
 limiter = Limiter(
     get_remote_address,
     app=app,
@@ -63,7 +73,7 @@ def handle_exception(e):
         return jsonify({"error": "Not Found"}), 404
         
     logging.error(f"Global Error: {e}", exc_info=True)
-    # SEC-11: Return generic JSON instead of leaking internal exceptions
+    # Return generic JSON for errors
     return jsonify({"error": "An internal server error occurred."}), 500
 
 #=======================================    Routes    =======================================
@@ -132,7 +142,7 @@ def scrape_comments_route():
     shortcode = data.get('shortcode')
 
     import re
-    # SEC-09: Validate shortcode format and length to prevent malicious input
+    # Validate shortcode format and length
     if not shortcode or not isinstance(shortcode, str) or not re.match(r'^[a-zA-Z0-9_-]{1,30}$', shortcode):
         return jsonify({"error": "Invalid shortcode format"}), 400
 
@@ -224,7 +234,7 @@ def download_analyzed_csv_route():
 
     data = request.get_json()
     comments = data.get('comments') 
-    # SEC-03: Sanitize filename_prefix to prevent path traversal / header injection
+    # Sanitize filename_prefix
     import re
     raw_prefix = data.get('filename_prefix', 'analyzed_data')
     filename_prefix = re.sub(r'[^a-zA-Z0-9_\-]', '_', raw_prefix)[:50]
@@ -316,6 +326,6 @@ def refresh_session():
 
 #============================================   Main   =======================================
 if __name__ == '__main__':
-    # SEC-05: Read debug mode from env — never run debug=True in production!
+    # Read debug mode from env
     debug_mode = os.environ.get('FLASK_DEBUG', '0') == '1'
     app.run(host='0.0.0.0', port=5000, debug=debug_mode)
