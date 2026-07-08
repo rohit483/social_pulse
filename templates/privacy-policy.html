@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <meta name="description"
+        content="Social Pulse — Scrape Instagram comments and analyze sentiment instantly. No login required.">
+    <title>Social Pulse — Instagram Sentiment Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=6) }}">
+    <script src="{{ url_for('static', filename='script.js', v=6) }}" defer></script>
+</head>
+
+<body>
+
+    <!-- =========== HEADER =========== -->
+    <header class="app-header">
+        <nav class="app-nav container">
+            <a href="/" class="nav-logo" aria-label="Social Pulse Home">
+                <img src="{{ url_for('static', filename='assets/logo.svg') }}" alt="Social Pulse Logo" class="logo-img">
+                <span class="logo-wordmark">Social Pulse</span>
+            </a>
+            <div class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#app" class="nav-link">Try It</a>
+                <a href="#faq" class="nav-link">FAQ</a>
+                <button id="theme-toggle" class="theme-toggle-btn" title="Toggle Dark Mode">
+                    <!-- Sun icon (shown in dark mode) -->
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" width="18" height="18">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <!-- Moon icon (shown in light mode) -->
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" width="18" height="18">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+            </div>
+        </nav>
+    </header>
+<main class="container">
+<!-- Privacy Policy Content -->
+        <div class="container card-base" style="max-width: 800px; margin: 40px auto; padding: 30px; background: var(--bg-color); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-small);" style="margin-top: 2rem;">
+            <div class="text-center mb-8">
+                <h1 class="mb-4">Privacy Policy</h1>
+                <p class="text-gray-600">Last updated: April 4, 2026</p>
+            </div>
+
+            <div class="privacy-content" style="line-height: 1.7;">
+                <p class="mb-6">
+                    This Privacy Policy describes how Social Pulse ("we", "our", "us") collects, uses, stores, discloses, and protects personal data of users accessing https://www.Social Pulse. This policy is designed to comply with India (DPDP Act) and other applicable global data protection regulations.
+                </p>
+
+                <section class="mb-6">
+                    <h2 class="mb-3" style="color: var(--primary); font-size: 1.5rem;">1. Definitions</h2>
+                    <p>Personal Data refers to any information that identifies or relates to an identifiable individual. Processing includes collection, storage, use, disclosure, and deletion.</p>
+                </section>
+
+                <section class="mb-6">
+                    <h2 class="mb-3" style="color: var(--primary); font-size: 1.5rem;">2. Information We Collect</h2>
+                    <p><strong>Personal identification information:</strong> We may collect personal identification information from Users only if they voluntarily submit such information to us (e.g., via a contact form). Users can always refuse to supply personally identification information.</p>
+                    <p style="margin-top: 10px;"><strong>Non-personal identification information:</strong> We may collect non-personal identification information about Users whenever they interact with our Site. This may include the browser name, the type of computer, and technical information about Users' means of connection to our Site, such as the operating system and the Internet service providers utilized and other similar information.</p>
+                </section>
+
+                <section class="mb-6">
+                    <h2 class="mb-3" style="color: var(--primary); font-size: 1.5rem;">3. Legal Basis of Processing</h2>
+                    <p>Data is processed based on consent, contractual necessity, legal obligation, and legitimate interests in compliance with applicable laws.</p>
+                </section>
+
+                <section class="mb-6">
+                    <h2 class="mb-3" style="color: var(--primary); font-size: 1.5rem;">4. How We Use Collected Information</h2>
+                    <p style="font-weight: bold; color: var(--primary);">Social Pulse does not collect or store your data, period.</p>
+                    <p>Any non-personal technical data collected is used solely to operate services, improve functionality, ensure security, and analyze usage trends. The sentiment analysis is processed on-the-fly and the underlying comment data is not permanently archived in our databases.</p>
+                </section>
+
+                <section class="mb-6">
+                    <h2 class="mb-3" style="color: var(--primary); font-size: 1.5rem;">5. Cookies, Tracking & Advertising</h2>
+                    <p>Ads appearing on our site may be delivered to Users by advertising partners, who may set cookies. These cookies allow the ad server to recognize your computer each time they send you an online advertisement to compile non-personal identification information about you or others who use your computer. This information allows ad networks to, among other things, deliver targeted advertisements that they believe will be of most interest to you.</p>
+                    <p style="margin-top: 10px;">Some of the ads may be served by Google. Google's use of the DART cookie enables it to serve ads to Users based on their visit to our Site and other sites on the Internet. DART uses "non-personally identifiable information" and does NOT track personal information about you. You may opt out of the use of the DART cookie by visiting the Google ad and content network privacy policy at https://policies.google.com/technologies/ads</p>
+                </section>
+
+                <section class="mb-6">
+                    <h2 class="mb-3" style="color: var(--primary); font-size: 1.5rem;">6. Data Sharing and Disclosure</h2>
+                    <p>We do not sell personal data. Data may be shared with trusted service providers, regulatory authorities, or legal entities when required.</p>
+                </section>
+
+                <section class="mb-6">
+                    <h2 class="mb-3" style="color: var(--primary); font-size: 1.5rem;">7. International Data Transfers</h2>
+                    <p>Where applicable, data transfers outside India are conducted with appropriate safeguards.</p>
+                </section>
+
+                <section class="mb-6">
+                    <h2 class="mb-3" style="color: var(--primary); font-size: 1.5rem;">8. Data Retention</h2>
+                    <p>Personal data is retained only for as long as necessary to fulfill purposes outlined or comply with legal obligations.</p>
+                </section>
+
+                <section class="mb-6">
+                    <h2 class="mb-3" style="color: var(--primary); font-size: 1.5rem;">9. User Rights</h2>
+                    <p>Users may request access, correction, deletion, restriction, or portability of their data. Requests can be sent to <a href="mailto:contact@socialpulse.com" style="color: var(--primary); text-decoration: underline;">contact@socialpulse.com</a>.</p>
+                </section>
+
+                <section class="mb-6">
+                    <h2 class="mb-3" style="color: var(--primary); font-size: 1.5rem;">10. Data Security</h2>
+                    <p>We implement administrative, technical, and physical safeguards to protect personal data against unauthorized access or misuse.</p>
+                </section>
+
+                <section class="mb-6">
+                    <h2 class="mb-3" style="color: var(--primary); font-size: 1.5rem;">11. Children's Data</h2>
+                    <p>Our services are not intended for individuals under 18 years of age.</p>
+                </section>
+
+                <section class="mb-6">
+                    <h2 class="mb-3" style="color: var(--primary); font-size: 1.5rem;">12. Policy Updates</h2>
+                    <p>This Privacy Policy may be updated periodically. Continued use signifies acceptance of changes.</p>
+                </section>
+
+                <section class="mb-6">
+                    <h2 class="mb-3" style="color: var(--primary); font-size: 1.5rem;">13. Contact Information</h2>
+                    <p>For questions or requests, contact us at <a href="mailto:contact@socialpulse.com" style="color: var(--primary); text-decoration: underline;">contact@socialpulse.com</a>.</p>
+                </section>
+
+                <!-- Back to Home Button -->
+                <div class="text-center mt-10">
+                    <a href="/" class="btn-primary">Back to Home</a>
+                </div>
+            </div>
+        </div>
+
+    
+</main>
+<!-- =========== FOOTER =========== -->
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <div class="footer-col footer-brand">
+                <div class="footer-logo-row">
+                    <img src="{{ url_for('static', filename='assets/logo.svg') }}" alt="Social Pulse"
+                        class="footer-logo-img">
+                    <span class="footer-brand-name">Social Pulse</span>
+                </div>
+                <p class="footer-tagline">Open-source Instagram comment sentiment analysis. Fast, private, and free.</p>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-col-title">Quick Links</h4>
+                <ul class="footer-links">
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#app">Try It Now</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-col-title">Legal</h4>
+                <ul class="footer-links">
+                    <li><a href="/privacy-policy">Privacy Policy</a></li>
+                    <li><a href="/terms">Terms of Use</a></li>
+                    <li><a href="/license">License (MIT)</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-col-title">Contact</h4>
+                <ul class="footer-links contact-links">
+                    <li>
+                        <a href="mailto:contact@rohitchawda.me" style="display: flex; align-items: center; gap: 8px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="flex-shrink: 0; color:#EA4335;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                            contact@rohitchawda.me
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://wa.me/917587904241" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; gap: 8px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="flex-shrink: 0; color:#25D366;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                            +91 7587904241
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/rohit483/social_pulse" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; gap: 8px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="flex-shrink: 0;"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" /></svg>
+                            social_pulse
+                        </a>
+                    </li>
+                    <li style="color: var(--text-primary); font-size: 13px; display: flex; align-items: flex-start; gap: 8px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="flex-shrink: 0; margin-top: 2px; color:#E91E63;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        Indore, Madhya Pradesh
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom container">
+            <p>&copy; 2025–2026 Social Pulse.</p>
+        </div>
+    </footer>
+
+    <div class="affiliation-warning">
+        Social Pulse is not affiliated with Instagram or Meta. All Instagram™ logos and trademarks displayed on this
+        website are the property of Instagram.
+    </div>
+</body>
+
+</html>

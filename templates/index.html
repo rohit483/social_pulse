@@ -5,21 +5,141 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
-    <title>Social Pulse</title>
-    <!-- Cache busted to ensure you see updates immediately -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=2) }}">
-    <script src="{{ url_for('static', filename='script.js', v=2) }}" defer></script>
+    <meta name="description"
+        content="Social Pulse — Scrape Instagram comments and analyze sentiment instantly. No login required.">
+    <title>Social Pulse — Instagram Sentiment Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=6) }}">
+    <script src="{{ url_for('static', filename='script.js', v=6) }}" defer></script>
 </head>
 
 <body>
-    <div class="container">
-        <header style="position: relative;">
-            <button id="theme-toggle" class="btn-outline"
-                style="position: absolute; right: 0; top: 0; min-height: 36px; padding: 6px 12px; border-radius: 9999px; font-size: 16px;"
-                title="Toggle Dark Mode">🌙</button>
-            <h1>Social Pulse</h1>
-            <p>Social Media Intelligence & Analytics</p>
-        </header>
+
+    <!-- =========== HEADER =========== -->
+    <header class="app-header">
+        <nav class="app-nav container">
+            <a href="/" class="nav-logo" aria-label="Social Pulse Home">
+                <img src="{{ url_for('static', filename='assets/logo.svg') }}" alt="Social Pulse Logo" class="logo-img">
+                <span class="logo-wordmark">Social Pulse</span>
+            </a>
+            <div class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#app" class="nav-link">Try It</a>
+                <a href="#faq" class="nav-link">FAQ</a>
+                <button id="theme-toggle" class="theme-toggle-btn" title="Toggle Dark Mode">
+                    <!-- Sun icon (shown in dark mode) -->
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" width="18" height="18">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <!-- Moon icon (shown in light mode) -->
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" width="18" height="18">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- =========== HERO SECTION =========== -->
+    <section class="hero-tagline container">
+        <h1>Know What Audience<br><span class="gradient-text">Really Thinks</span></h1>
+        <p class="hero-desc">Scrape any Instagram post's comments and get instant AI-powered sentiment analysis. No
+            account, no login, just results.</p>
+        <a href="#app" class="btn-primary hero-cta">Analyze a Post →</a>
+    </section>
+
+    <!-- =========== FEATURES SECTION =========== -->
+    <section id="features" class="container features-section">
+        <div class="section-header">
+            <h2>What Social Pulse Does</h2>
+            <p class="section-desc">Everything you need to understand the mood of your Instagram audience.</p>
+        </div>
+
+        <div class="features-grid">
+            <!-- Feature 1 -->
+            <div class="feature-card">
+                <div class="feature-icon"
+                    style="background: linear-gradient(135deg, rgba(240,148,51,0.15), rgba(220,39,67,0.15));">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="url(#ig-grad)"
+                        stroke-width="2" width="26" height="26">
+                        <defs>
+                            <linearGradient id="ig-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#f09433" />
+                                <stop offset="100%" stop-color="#bc1888" />
+                            </linearGradient>
+                        </defs>
+                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                    </svg>
+                </div>
+                <h3>Instagram Comment Scraper</h3>
+                <p>Paste any Instagram post URL or shortcode and pull up to 200 comments automatically — no manual
+                    copy-pasting required.</p>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="feature-card">
+                <div class="feature-icon"
+                    style="background: linear-gradient(135deg, rgba(52,211,153,0.15), rgba(16,185,129,0.15));">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#10B981"
+                        stroke-width="2" width="26" height="26">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                    </svg>
+                </div>
+                <h3>AI Sentiment Analysis</h3>
+                <p>Every comment is automatically labelled Positive, Negative, or Neutral using a fine-tuned NLP model —
+                    with a full breakdown summary.</p>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="feature-card">
+                <div class="feature-icon"
+                    style="background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(99,102,241,0.15));">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#3B82F6"
+                        stroke-width="2" width="26" height="26">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                </div>
+                <h3>CSV Upload & Analysis</h3>
+                <p>Already have comment data? Upload any CSV with a <code>comment</code> column and get the full
+                    sentiment breakdown in seconds.</p>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="feature-card">
+                <div class="feature-icon"
+                    style="background: linear-gradient(135deg, rgba(251,191,36,0.15), rgba(245,158,11,0.15));">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#F59E0B"
+                        stroke-width="2" width="26" height="26">
+                        <polyline points="8 17 12 21 16 17"></polyline>
+                        <line x1="12" y1="12" x2="12" y2="21"></line>
+                        <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"></path>
+                    </svg>
+                </div>
+                <h3>Export to CSV</h3>
+                <p>Download your results as a fully analyzed CSV (with sentiment labels) or a clean raw comment list —
+                    perfect for reporting.</p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- =========== APP SECTION =========== -->
+    <main id="app" class="container">
 
         <!-- Section 1: Scraper Input -->
         <div class="card" id="scraper-input-section">
@@ -41,7 +161,6 @@
         <div class="card results-area" id="scraper-results-section">
             <h2>Scraper Results</h2>
 
-            <!-- Analyzed Data Preview -->
             <div class="result-block">
                 <h3>Sentiment Analysis</h3>
                 <div class="sentiment-summary" id="scrape-sentiment-summary">
@@ -53,7 +172,6 @@
                 </div>
             </div>
 
-            <!-- Table Preview (Optional or Collapsible) -->
             <details>
                 <summary>View Comments Preview</summary>
                 <div class="table-container">
@@ -87,7 +205,7 @@
             <div id="upload-error" class="error-message"></div>
         </div>
 
-        <!-- Section 3 Results (Hidden by default) -->
+        <!-- Section 4: CSV Results (Hidden by default) -->
         <div class="card results-area" id="upload-results-section">
             <h3>Analysis Results</h3>
             <div class="sentiment-summary" id="upload-sentiment-summary"></div>
@@ -111,7 +229,176 @@
             </details>
         </div>
 
+    </main>
 
+    <!-- =========== FAQ SECTION =========== -->
+    <section id="faq" class="container faq-section">
+        <div class="section-header">
+            <h2>Frequently Asked Questions</h2>
+        </div>
+
+        <div class="faq-container">
+
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFAQ(this)">
+                    <span>What is Social Pulse?</span>
+                    <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" width="18" height="18">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="faq-answer">
+                    <p>Social Pulse is an open-source Instagram analytics tool that scrapes public post comments and
+                        runs them through an AI sentiment model. It tells you what percentage of your audience reacts
+                        positively, negatively, or neutrally — without you needing to read every comment yourself.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFAQ(this)">
+                    <span>Do I need an Instagram account to use this?</span>
+                    <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" width="18" height="18">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="faq-answer">
+                    <p>You do not need your own account. Social Pulse uses a pre-authenticated backend session to fetch
+                        comments. You just paste the public post URL and the tool does the rest. It only works on public
+                        Instagram posts.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFAQ(this)">
+                    <span>Is my data stored or shared?</span>
+                    <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" width="18" height="18">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="faq-answer">
+                    <p>Scrape results are stored temporarily in the database only for session tracking and may be
+                        cleared periodically. We never sell or share your data. Your uploaded CSV files are only
+                        analyzed in memory and are not written to permanent storage.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFAQ(this)">
+                    <span>How accurate is the sentiment analysis?</span>
+                    <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" width="18" height="18">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="faq-answer">
+                    <p>The model is tuned for short, informal text like social media comments. It handles emojis, slang,
+                        and mixed language reasonably well but is not perfect — especially for sarcasm or highly
+                        regional expressions. Treat it as a fast signal, not a scientific score.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFAQ(this)">
+                    <span>How many comments can I analyze at once?</span>
+                    <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" width="18" height="18">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="faq-answer">
+                    <p>The scraper fetches up to 200 comments per Instagram post. For CSV uploads, there is no hard cap
+                        — though very large files (10,000+ rows) may take a few minutes to process. The file size limit
+                        is 10 MB.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFAQ(this)">
+                    <span>Can I use this for a private Instagram profile?</span>
+                    <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" width="18" height="18">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="faq-answer">
+                    <p>No. Social Pulse can only scrape publicly accessible posts. Private accounts require direct
+                        authentication which this tool does not support by design.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- =========== FOOTER =========== -->
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <div class="footer-col footer-brand">
+                <div class="footer-logo-row">
+                    <img src="{{ url_for('static', filename='assets/logo.svg') }}" alt="Social Pulse"
+                        class="footer-logo-img">
+                    <span class="footer-brand-name">Social Pulse</span>
+                </div>
+                <p class="footer-tagline">Open-source Instagram comment sentiment analysis. Fast, private, and free.</p>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-col-title">Quick Links</h4>
+                <ul class="footer-links">
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#app">Try It Now</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-col-title">Legal</h4>
+                <ul class="footer-links">
+                    <li><a href="/privacy-policy">Privacy Policy</a></li>
+                    <li><a href="/terms">Terms of Use</a></li>
+                    <li><a href="/license">License</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-col-title">Contact</h4>
+                <ul class="footer-links contact-links">
+                    <li>
+                        <a href="mailto:contact@rohitchawda.me" style="display: flex; align-items: center; gap: 8px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="flex-shrink: 0; color:#EA4335;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                            contact@rohitchawda.me
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://wa.me/917587904241" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; gap: 8px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="flex-shrink: 0; color:#25D366;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                            +91 7587904241
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/rohit483/social_pulse" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; gap: 8px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="flex-shrink: 0;"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" /></svg>
+                            social_pulse
+                        </a>
+                    </li>
+                    <li style="color: var(--text-primary); font-size: 13px; display: flex; align-items: flex-start; gap: 8px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="flex-shrink: 0; margin-top: 2px; color:#E91E63;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        Indore, Madhya Pradesh
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom container">
+            <p>&copy; 2025–2026 Social Pulse.</p>
+        </div>
+    </footer>
+
+    <div class="affiliation-warning">
+        Social Pulse is not affiliated with Instagram or Meta. All Instagram™ logos and trademarks displayed on this
+        website are the property of Instagram.
+    </div>
 </body>
 
 </html>
