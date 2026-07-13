@@ -11,7 +11,7 @@ load_dotenv()
 # Config class for application configuration
 class Config:
     # API Keys & Secrets
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-123'
+    SECRET_KEY = os.environ.get('SECRET_KEY')
     OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
     HUGGINGFACE_API_KEY = os.environ.get('HUGGINGFACE_API_KEY')
 

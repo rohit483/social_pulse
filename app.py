@@ -107,11 +107,9 @@ def terms():
 
 @app.route('/license')
 def license_page():
-    try:
-        with open('LICENSE', 'r') as f:
-            return Response(f.read(), mimetype='text/plain')
-    except Exception as e:
-        return jsonify({"error": "License file not found."}), 404
+    with open("LICENSE", "rb") as f:
+        content = f.read()
+    return Response(content, mimetype="text/plain")
 
 #-----------------------------------------------------------------------------------
 # --- 2. Sentiment Analysis Routes ---

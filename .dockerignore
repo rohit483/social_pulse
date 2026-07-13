@@ -9,7 +9,6 @@ Dockerfile
 docker-compose.yml
 agent-context/
 *agent-context
-LICENSE
 
 # Data Directories (we mount these as volumes)
 webdata/
