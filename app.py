@@ -101,6 +101,10 @@ def home():
 def privacy_policy():
     return render_template('privacy-policy.html')
 
+@app.route('/support')
+def support():
+    return render_template('support.html')
+
 @app.route('/terms')
 def terms():
     return render_template('terms.html')

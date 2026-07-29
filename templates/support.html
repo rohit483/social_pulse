@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <meta name="description"
+        content="Social Pulse — Scrape Instagram comments and analyze sentiment instantly. No login required.">
+    <title>Support — Social Pulse</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=6) }}">
+    <script src="{{ url_for('static', filename='script.js', v=6) }}" defer></script>
+</head>
+
+<body>
+
+    <!-- =========== HEADER =========== -->
+    <header class="app-header">
+        <nav class="app-nav container">
+            <a href="/" class="nav-logo" aria-label="Social Pulse Home">
+                <img src="{{ url_for('static', filename='assets/logo.svg') }}" alt="Social Pulse Logo" class="logo-img">
+                <span class="logo-wordmark">Social Pulse</span>
+            </a>
+            <div class="nav-links">
+                <a href="/#app" class="nav-link">Try It</a>
+                <a href="/#faq" class="nav-link">FAQ</a>
+                <a href="/support" class="nav-link">Support</a>
+                <a href="/privacy-policy" class="nav-link">Policy</a>
+                <a href="mailto:contact@socialpulse.software" class="nav-link">Contact</a>
+                <button id="theme-toggle" class="theme-toggle-btn" title="Toggle Dark Mode">
+                    <!-- Sun icon (shown in dark mode) -->
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" width="18" height="18">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <!-- Moon icon (shown in light mode) -->
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" width="18" height="18">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+
+    <!-- =========== MAIN CONTENT =========== -->
+    <main class="container py-6" style="margin-bottom: 40px; min-height: 70vh;">
+
+        <div class="section-header text-center mt-4">
+            <h1 class="mb-2">Support Social Pulse</h1>
+            <p class="section-description">Help Build a Better Analytics Platform</p>
+        </div>
+
+        <div
+            style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 2rem; margin-top: 2rem;">
+
+            <!-- Section 1: Why We Need Donations -->
+            <section class="card-base"
+                style="padding: 30px; background: var(--bg-color); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-small);">
+                <h2 style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--text-primary); text-align: center;">Why
+                    Your Support Matters</h2>
+                <div class="support-text" style="color: var(--text-secondary); line-height: 1.7;">
+                    <p style="margin-bottom: 1rem;">Social Pulse started out as a project with a simple goal: to help
+                        creators, brands, and everyday users understand their Instagram audience instantly through
+                        AI-powered sentiment analysis.</p>
+
+                    <p style="margin-bottom: 1rem;">Today, Social Pulse handles Instagram comment scraping, sentiment
+                        labeling, and instant feedback processing. While the platform is fully up and running, a few key
+                        features and scaling abilities are currently held back by limited solo-developer resources.</p>
+
+                    <p style="margin-bottom: 1rem;">Right now, Social Pulse relies on dev-tier AI models, which have
+                        usage caps and performance limits. Upgrading to production-grade AI will unlock faster response
+                        times, sharper sentiment analysis, better language support, and the ability to serve many more
+                        users at once without rate limits.</p>
+
+                    <p style="margin-bottom: 0.5rem;">Here is where your support directly goes:</p>
+                    <ul style="list-style-type: disc; margin-left: 2rem; margin-bottom: 1.5rem;">
+                        <li><strong>Production AI Services</strong> – Sharper sentiment reviews, faster responses, and
+                            multi-language support.</li>
+                        <li><strong>API & Proxy Infrastructure</strong> – Stable scraping capabilities without getting
+                            blocked.</li>
+                        <li><strong>Hosting & Server Costs</strong> – Keeping the platform online, secure, fast, and
+                            free to use.</li>
+                    </ul>
+
+                    <p style="margin-bottom: 1rem;">Every bit helps, no matter the amount. Your support goes straight
+                        into making Social Pulse smarter, faster, and accessible to everyone.</p>
+
+                    <p>Thanks for backing independent development!</p>
+                </div>
+            </section>
+
+            <!-- Section 2: UPI Payment -->
+            <section class="card-base"
+                style="padding: 30px; text-align: center; background: var(--bg-color); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-small);">
+                <h2 style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--text-primary);">Donate via UPI (India)
+                </h2>
+                <p style="line-height: 1.6; color: var(--text-secondary); margin-bottom: 1.5rem;">
+                    Scan the QR code below or use the UPI ID to send your contribution securely.
+                </p>
+                <div
+                    style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                    <div
+                        style="width: 240px; height: 240px; background-color: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; border-radius: 8px; margin-bottom: 1rem; overflow: hidden;">
+                        <img src="/static/assets/QR.jpeg" alt="UPI QR Code"
+                            style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;">
+                    </div>
+                    <div class="upi-box"
+                        style="padding: 0.75rem 1.5rem; border-radius: 6px; background: var(--surface); border: 1px solid var(--border);">
+                        <strong style="color: var(--text-primary);">UPI ID:</strong> <span
+                            style="font-family: monospace; font-size: 1.1rem; user-select: all; color: var(--text-secondary);">7869457084@kotakbank</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: PayPal & Card (Ko-fi) -->
+            <section class="card-base"
+                style="padding: 30px; text-align: center; background: var(--bg-color); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-small);">
+                <h2 style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--text-primary);">PayPal & Credit Card
+                    (Global)</h2>
+                <p style="line-height: 1.6; color: var(--text-secondary); margin-bottom: 1.5rem;">
+                    For international supporters or those who prefer PayPal/Cards, you can support us on Ko-fi.
+                </p>
+                <a href="https://ko-fi.com/rohit483" target="_blank" rel="noopener noreferrer" class="btn-primary"
+                    style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 2rem; font-size: 1.1rem; text-decoration: none; margin-bottom: 1.5rem; border-radius: 8px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="currentColor" stroke="none">
+                        <path
+                            d="M20.895 5.568C20.67 5.15 20.315 4.846 19.86 4.69c-2.315-.792-6.527-.518-8.243-.243-1.716-.275-5.928-.549-8.243.243-.455.156-.81.46-1.035.878-.235.437-.282.97-.132 1.503l2.09 7.426c.264.939 1.11 1.583 2.083 1.583h5.247c.97 0 1.815-.644 2.08-1.583l2.09-7.426c.15-.533.103-1.066-.13-1.503z" />
+                        <path opacity=".5" d="M12 6.5s-2 3-5 3c0 0 3-1.5 5-4.5 2 3 5 4.5 5 4.5-3 0-5-3-5-3z" />
+                    </svg>
+                    Support on Ko-fi
+                </a>
+
+                <div class="transparency-box"
+                    style="border-radius: 8px; padding: 1rem; text-align: left; font-size: 0.95rem; line-height: 1.5; background: var(--surface); border: 1px solid var(--border); color: var(--text-secondary);">
+                    <strong style="color: var(--text-primary);">Transparency:</strong> Social Pulse is independently
+                    developed and maintained by a single developer. All contributions are used exclusively for AI API
+                    usage, scraping infrastructure, hosting, and ongoing platform development.
+                </div>
+            </section>
+
+        </div>
+    </main>
+    <!-- =========== FOOTER =========== -->
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <div class="footer-col footer-brand">
+                <div class="footer-logo-row">
+                    <img src="{{ url_for('static', filename='assets/logo.svg') }}" alt="Social Pulse"
+                        class="footer-logo-img">
+                    <span class="footer-brand-name">Social Pulse</span>
+                </div>
+                <p class="footer-tagline">Instagram comment sentiment analysis. Fast, private, and free.</p>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-col-title">Quick Links</h4>
+                <ul class="footer-links">
+                    <li><a href="/#features">Features</a></li>
+                    <li><a href="/support">Support</a></li>
+                    <li><a href="/#faq">FAQ</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-col-title">Legal</h4>
+                <ul class="footer-links">
+                    <li><a href="/privacy-policy">Privacy Policy</a></li>
+                    <li><a href="/terms">Terms of Use</a></li>
+                    <li><a href="/license">License</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-col-title">Contact</h4>
+                <ul class="footer-links contact-links">
+                    <li>
+                        <a href="mailto:contact@socialpulse.software"
+                            style="display: flex; align-items: center; gap: 8px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" width="16" height="16"
+                                style="flex-shrink: 0; color:#EA4335;">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
+                                </path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            contact@socialpulse.software
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/rohit483/social_pulse" target="_blank" rel="noopener noreferrer"
+                            style="display: flex; align-items: center; gap: 8px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16"
+                                height="16" style="flex-shrink: 0;">
+                                <path
+                                    d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
+                            </svg>
+                            social_pulse
+                        </a>
+                    </li>
+                    <li
+                        style="color: var(--text-primary); font-size: 13px; display: flex; align-items: flex-start; gap: 8px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" width="16" height="16"
+                            style="flex-shrink: 0; margin-top: 2px; color:#E91E63;">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        Indore, Madhya Pradesh
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom container">
+            <p>&copy; 2025–2026 Social Pulse.</p>
+        </div>
+    </footer>
+
+    <div class="affiliation-warning">
+        Social Pulse is not affiliated with Instagram or Meta. All Instagram™ logos and trademarks displayed on this
+        website are the property of Instagram.
+    </div>
+</body>
+
+</html>
