@@ -19,7 +19,7 @@ class Config:
     BASE_DIR = os.getcwd()
     
     # Paths to CSV upload and download folders
-    UPLOAD_FOLDER = os.path.join(os.getcwd(), 'webdata', 'csv uploads')
+    UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER') or os.path.join(os.getcwd(), 'webdata', 'csv uploads')
     DOWNLOAD_FOLDER = os.environ.get('DOWNLOAD_FOLDER') or os.path.join(os.getcwd(), 'webdata', 'csv downloads')
 
     INSTAGRAM_USERNAME = os.environ.get('INSTAGRAM_USERNAME', '').strip() or None

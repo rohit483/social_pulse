@@ -3,6 +3,7 @@ FROM python:3.10-slim
 # Prevent Python from writing pyc files and buffering stdout
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV PORT=5000
 
 WORKDIR /app
 
@@ -19,9 +20,6 @@ COPY . .
 # Create directory for session files (mounted volume will map here)
 # and webdata directories
 RUN mkdir -p webdata/csv\ uploads webdata/csv\ downloads 
-
-# Expose port
-EXPOSE 5000
 
 # Run the application
 CMD ["python", "app.py"]
