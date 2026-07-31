@@ -306,20 +306,55 @@ def require_admin_token(f):
 @app.route('/admin/check-session', methods=['GET'])
 @require_admin_token
 def check_session():
-    """Check if sessions are active and healthy"""
+    """Check if sessions are active and healthy via live API pings"""
     scraper_service = get_scraper()
     if not scraper_service:
         return jsonify({
             "status": "error",
-            "message": "Scraper not initialized"
+            "message": "Scraper not initialized",
+            "instagrapi_active": False,
+            "instaloader_active": False
         }), 503
-    
+
+    instagrapi_ok = False
+    instaloader_ok = False
+
+    # 1. Real Instagrapi Active Check (API Ping)
+    if hasattr(scraper_service, 'cl') and scraper_service.cl and scraper_service.instagrapi_active:
+        try:
+            # account_info() makes an actual network call to Instagram
+            scraper_service.cl.account_info()
+            instagrapi_ok = True
+        except Exception as e:
+            logging.warning(f"Instagrapi live check failed (session dead): {e}")
+            scraper_service.instagrapi_active = False
+            instagrapi_ok = False
+    else:
+        instagrapi_ok = False
+
+    # 2. Real Instaloader Active Check (API Ping)
+    if hasattr(scraper_service, 'L') and scraper_service.L and scraper_service.instaloader_active:
+        try:
+            # test_login() sends a query to Instagram to verify session validity
+            username = scraper_service.L.test_login()
+            if username:
+                instaloader_ok = True
+            else:
+                scraper_service.instaloader_active = False
+                instaloader_ok = False
+        except Exception as e:
+            logging.warning(f"Instaloader live check failed (session dead): {e}")
+            scraper_service.instaloader_active = False
+            instaloader_ok = False
+    else:
+        instaloader_ok = False
+
     return jsonify({
         "status": "ok",
-        "instagrapi_active": scraper_service.instagrapi_active,
-        "instaloader_active": scraper_service.instaloader_active,
+        "instagrapi_active": instagrapi_ok,
+        "instaloader_active": instaloader_ok,
         "message": "Session check complete"
-    })
+    }), 200
 
 #-----------------------------------------------------------------------------------
 @app.route('/admin/refresh-session', methods=['POST'])

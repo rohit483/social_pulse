@@ -8,6 +8,8 @@ cookie.json
 *.json
 agent-context/
 *agent-context
+session-devritzloper
+sync_cookie.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

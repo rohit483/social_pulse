@@ -33,9 +33,9 @@ social_pulse/
 ├── app.py                  # Main Flask Application
 ├── Dockerfile              # Docker Image Config
 ├── docker-compose.yml      # Service Orchestration
-├── entrypoint.sh           # Automated Boot Script
 ├── extract_sessions.py     # Automated Cookie Parser
 ├── requirements.txt        # Project Dependencies
+├── nginx.conf              # Nginx Reverse Proxy Config
 ├── modules/                # Core Logic Modules
 │   ├── database/           # PostgreSQL DB Models
 │   ├── analysis/           # Sentiment Analysis Engine
@@ -79,7 +79,7 @@ Open `http://localhost` (or Port 80) in your browser.
 ## 💡 Troubleshooting
 
 Having issues with `cookie.json`, database connections, or UI glitches?
-👉 **Please check out the [Troubleshooting Guide](troubleshooting.md) for quick fixes!**
+👉 **Please check out the [`troubleshooting.md`](https://github.com/rohit483/social_pulse/blob/main/troubleshooting.md) for quick fixes!**
 
 ---
 
@@ -105,4 +105,4 @@ Contributions are what make the open source community such an amazing place to l
 
 ## 📜 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the AGPLv3 License. See [`LICENSE`](https://github.com/rohit483/social_pulse/blob/main/LICENSE) for more information.
