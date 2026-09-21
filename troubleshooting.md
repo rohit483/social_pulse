@@ -23,6 +23,21 @@ This guide covers the most common issues you might face when deploying or runnin
 3. Once you can view feeds normally again, re-export your cookies to `cookie.json`.
 4. Restart your docker container to extract the fresh sessions.
 
+### 🔴 Error: `checkpoint_required` or an invalid Instagram session
+**Why it happens:** Instagram has challenged or invalidated the Instagrapi session.
+**How to fix:**
+1. Log into the Instagram account in a normal browser on a trusted network.
+2. Complete any security, identity, or suspicious-login challenge.
+3. Export fresh cookies to `cookie.json`.
+4. Regenerate the session environment values and redeploy/restart the container:
+   ```bash
+   docker compose up -d --build --force-recreate social-pulse
+   ```
+5. Run the Instagrapi test again:
+   ```bash
+   docker exec social_pulse-social-pulse-1 python test/test_instagrapi.py
+   ```
+
 ---
 
 ## 2. Database Errors

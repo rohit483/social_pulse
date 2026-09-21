@@ -1,7 +1,6 @@
 import os
 import json
 import base64
-import instaloader
 from instagrapi import Client
 from dotenv import load_dotenv
 
@@ -103,34 +102,6 @@ def generate_from_json():
         print(f" [!] Instagrapi error: {e}")
 
     # ---------------------------------------------------------
-    # 3. GENERATE INSTALOADER BASE64
-    # ---------------------------------------------------------
-    print("\n[2/2] Processing Instaloader...")
-    instaloader_b64 = ""
-    try:
-        L = instaloader.Instaloader()
-        
-        # Inject the dictionary directly into Instaloader's internal session
-        for name, value in cookie_dict.items():
-            L.context._session.cookies.set(name, value, domain='.instagram.com')
-            
-        L.context.username = USERNAME
-        
-        # Save it to a local file in the root
-        temp_file = f"session-{USERNAME}"
-        L.save_session_to_file(temp_file)
-        
-        # Encode the file
-        with open(temp_file, 'rb') as f:
-            instaloader_b64 = base64.b64encode(f.read()).decode('utf-8')
-            
-        print(f" [+] Instaloader Session Encoded (saved to {temp_file})!")
-        _write_env_var('INSTALOADER_SESSION_B64', instaloader_b64)
-        
-    except Exception as e:
-        print(f" [!] Instaloader error: {e}")
-
-    # ---------------------------------------------------------
     # FINAL OUTPUT
     # ---------------------------------------------------------
     print("\n" + "="*50)
@@ -142,9 +113,6 @@ def generate_from_json():
         preview = f"{instagrapi_b64[:20]}...{instagrapi_b64[-20:]}"
         print(f"INSTAGRAPI_SESSION_B64  = {preview}")
         
-    if instaloader_b64:
-        preview = f"{instaloader_b64[:20]}...{instaloader_b64[-20:]}"
-        print(f"INSTALOADER_SESSION_B64 = {preview}")
 
 if __name__ == "__main__":
     generate_from_json()

@@ -1,6 +1,6 @@
 # Social Pulse 🚀
 
-**Social Pulse** is a smart tool for scraping and analyzing Instagram comments. It helps you understand what people are really saying by using a **Hybrid Scraper** (Instaloader + Instagrapi) and a **Gen-Z aware Sentiment Engine**.
+**Social Pulse** is a smart tool for scraping and analyzing Instagram comments using Instagrapi and a Gen-Z aware Sentiment Engine.
 
 Whether you're a data enthusiast, a marketer, or just curious, Social Pulse makes it easy to grab comments and visualize the vibe.
 
@@ -8,13 +8,10 @@ Whether you're a data enthusiast, a marketer, or just curious, Social Pulse make
 
 ## ✨ Features
 
-### 📸 Fail-Proof Hybrid Scraper
+### 📸 Instagram Comment Scraper
 
-- **Dual-Engine System**: Combines the strengths of two powerful libraries:
-  - **Primary**: `instaloader` (Fast, efficient for standard interaction).
-  - **Fallback**: `instagrapi` (Mimics mobile API, highly resistant to bot detection).
-- **Auto-Failover**: If the primary engine encounters a "Login Required" or connection error, the system automatically switches to the fallback engine without crashing.
-- **Robust Session Management**: Maintains separate session files for each engine to ensure stability.
+- **Instagrapi-only provider**: Uses the configured Instagrapi session to request up to 200 comments.
+- **Session management**: Refresh `cookie.json` and regenerate `INSTAGRAPI_SESSION_B64` when Instagram invalidates the session.
 - **Lazy Loading**: Scraper resources are only initialized when the scrape button is clicked, ensuring instant app startup.
 
 ### 🧠 Advanced Sentiment Analysis
@@ -70,7 +67,7 @@ docker-compose up
 ```
 
 **That's it!** 
-When the container starts, it will automatically detect your `cookie.json` file, extract the `instagrapi` and `instaloader` sessions, inject them into your environment, and start the app. 
+When the container starts, it detects `cookie.json`, extracts the Instagrapi session, and starts the app.
 
 Open `http://localhost` (or Port 80) in your browser.
 

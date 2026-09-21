@@ -7,9 +7,6 @@ ENV PORT=5000
 
 WORKDIR /app
 
-# Install system dependencies (none really needed for instagrapi/instaloader on slim, but keeping fit)
-# RUN apt-get update && apt-get install -y --no-install-recommends gcc && rm -rf /var/lib/apt/lists/*
-
 # Install python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt

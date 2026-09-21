@@ -15,6 +15,7 @@
 
 import os
 import logging
+from dotenv import load_dotenv
 
 # --- Bootstrapping: Auto-extract sessions from cookie.json if provided (Dev Only) ---
 if os.path.exists("cookie.json") and os.path.getsize("cookie.json") > 10:
@@ -22,6 +23,9 @@ if os.path.exists("cookie.json") and os.path.getsize("cookie.json") > 10:
     try:
         from extract_sessions import generate_from_json
         generate_from_json()
+        # Docker env_file values are loaded before startup; replace them with
+        # the sessions freshly generated from cookie.json.
+        load_dotenv(override=True)
     except Exception as e:
         print(f"Warning: Session extraction failed: {e}")
 
@@ -70,7 +74,7 @@ def get_scraper():
     if scraper is None:
         try:
             scraper = InstagramScraper()
-            if scraper.instaloader_active or scraper.instagrapi_active:
+            if scraper.instagrapi_active:
                 logging.info("InstagramScraper initialized successfully.")
             else:
                 logging.warning("InstagramScraper initialized but NO active sessions found.")
@@ -183,12 +187,12 @@ def scrape_comments_route():
     if not scraper_service:
         return jsonify({"error": "Scraper service unavailable"}), 503
 
-    # Check session health - if both inactive, try refresh
-    if not scraper_service.instagrapi_active and not scraper_service.instaloader_active:
+    # Check Instagrapi session health before scraping
+    if not scraper_service.instagrapi_active:
         logging.warning("Sessions inactive before scrape. Attempting refresh...")
         scraper_service.setup_session()
         
-        if not scraper_service.instagrapi_active and not scraper_service.instaloader_active:
+        if not scraper_service.instagrapi_active:
             return jsonify({
                 "error": "No active sessions available. Please refresh sessions manually via /admin/refresh-session"
             }), 503
@@ -197,7 +201,12 @@ def scrape_comments_route():
         comments = scraper_service.scrape_comments(shortcode)
     except Exception as e:
         logging.error(f"Scraping failed: {e}")
-        return jsonify({"error": f"Scraping failed: {str(e)}"}), 500
+        error_text = str(e)
+        if "checkpoint" in error_text.lower() or "anti-automation" in error_text.lower():
+            return jsonify({
+                "error": "Instagram requires a security checkpoint. Refresh cookie.json and restart the service."
+            }), 503
+        return jsonify({"error": f"Scraping failed: {error_text}"}), 500
     
     # Perform Sentiment Analysis immediately
     df_temp = pd.DataFrame(comments)
@@ -312,12 +321,10 @@ def check_session():
         return jsonify({
             "status": "error",
             "message": "Scraper not initialized",
-            "instagrapi_active": False,
-            "instaloader_active": False
+            "instagrapi_active": False
         }), 503
 
     instagrapi_ok = False
-    instaloader_ok = False
 
     # 1. Real Instagrapi Active Check (API Ping)
     if hasattr(scraper_service, 'cl') and scraper_service.cl and scraper_service.instagrapi_active:
@@ -332,27 +339,9 @@ def check_session():
     else:
         instagrapi_ok = False
 
-    # 2. Real Instaloader Active Check (API Ping)
-    if hasattr(scraper_service, 'L') and scraper_service.L and scraper_service.instaloader_active:
-        try:
-            # test_login() sends a query to Instagram to verify session validity
-            username = scraper_service.L.test_login()
-            if username:
-                instaloader_ok = True
-            else:
-                scraper_service.instaloader_active = False
-                instaloader_ok = False
-        except Exception as e:
-            logging.warning(f"Instaloader live check failed (session dead): {e}")
-            scraper_service.instaloader_active = False
-            instaloader_ok = False
-    else:
-        instaloader_ok = False
-
     return jsonify({
         "status": "ok",
         "instagrapi_active": instagrapi_ok,
-        "instaloader_active": instaloader_ok,
         "message": "Session check complete"
     }), 200
 
@@ -370,19 +359,17 @@ def refresh_session():
         scraper = None
         scraper_service = get_scraper()
         
-        if scraper_service and (scraper_service.instagrapi_active or scraper_service.instaloader_active):
+        if scraper_service and scraper_service.instagrapi_active:
             return jsonify({
                 "status": "success",
                 "message": "Session refreshed successfully",
-                "instagrapi_active": scraper_service.instagrapi_active,
-                "instaloader_active": scraper_service.instaloader_active
+                "instagrapi_active": scraper_service.instagrapi_active
             })
         else:
             return jsonify({
                 "status": "partial",
                 "message": "Session refresh attempted but no active sessions",
-                "instagrapi_active": False,
-                "instaloader_active": False
+                "instagrapi_active": False
             }), 503
             
     except Exception as e:

@@ -35,8 +35,7 @@ class Config:
         _logger.warning("Instagram username not found in environment variables!")
     
     # ── Session Management ─────────────────────────────────────────────────────
-    # Sessions are exclusively loaded from Base64 environment variables
-    # (INSTALOADER_SESSION_B64 and INSTAGRAPI_SESSION_B64). No local files are used.
+    # The Instagrapi session is loaded from INSTAGRAPI_SESSION_B64.
 
 
     # Comment limit
