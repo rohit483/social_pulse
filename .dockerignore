@@ -15,6 +15,8 @@ webdata/
 # Environments & Secrets
 .env
 .env.example
+.env.prod.example
+.env.prod
 *.env
 
 # Documentation & Guides
@@ -23,6 +25,7 @@ SECURITY.md
 INSTAGRAM_SESSION_GUIDE.md
 task.md
 *.md
+test/*
 
 # Build & Logs
 *.pyc
